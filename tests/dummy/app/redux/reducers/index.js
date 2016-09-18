@@ -17,3 +17,5 @@ const defaultState = {};
 const reducer = (state, action) => {
   return defaultState;
 }
+
+export default reducer;

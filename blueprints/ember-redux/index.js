@@ -1,4 +1,6 @@
 /*jshint node:true*/
+var path = require('path');
+
 module.exports = {
   description: 'Installation blueprint for ember-redux',
   normalizeEntityName: function() {},
@@ -20,6 +22,15 @@ module.exports = {
     var self = this;
     return {
       __root__: function(options) {
+        if (!!self.project.config()['ember-redux'] && !!self.project.config()['ember-redux'].directory) {
+          return self.project.config()['ember-redux'].directory;
+        } else if (options.inAddon) {
+          return path.join('tests', 'dummy');
+        } else {
+          return '/';
+        }
+      },
+      __app__: function(options) {
         if (!!self.project.config()['ember-redux'] && !!self.project.config()['ember-redux'].directory) {
           return self.project.config()['ember-redux'].directory;
         } else if (options.inAddon) {

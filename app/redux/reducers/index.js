@@ -1,0 +1,1 @@
+/Volumes/PEGASUS/repos/mine/ember-redux/tests/dummy/app/redux/reducers/index.js
