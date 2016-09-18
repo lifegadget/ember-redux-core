@@ -2,9 +2,5 @@
  * THUNK MIDDLEWARE
  */
 import thunk from 'npm:redux-thunk';
-
-const middleware = (store) => (next) => (action) => {
-  return thunk.default ? thunk.default : thunk;
-}
-
+const middleware = thunk.default ? thunk.default : thunk;
 export default middleware;

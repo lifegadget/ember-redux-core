@@ -1,5 +1,3 @@
-import Ember from 'ember';
-
 /**
  * This reducer takes in the localised state which
  * is owned by this reducer; it's job is create a

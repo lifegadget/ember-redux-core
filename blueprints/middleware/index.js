@@ -1,15 +1,15 @@
 /*jshint node:true*/
 'use strict';
-const fs          = require('fs-extra');
+const fs          = require('fs');
 const path        = require('path');
 const chalk       = require('chalk');
 
 module.exports = {
   description: 'Generates a reducer for Redux.',
 
-  fileMapTokens: function() {
+  fileMapTokens: function(options) {
     var self = this;
-    return {
+    const value = {
       __root__: function(options) {
         if (!!self.project.config()['ember-redux'] && !!self.project.config()['ember-redux'].directory) {
           return self.project.config()['ember-redux'].directory;
@@ -20,6 +20,8 @@ module.exports = {
         }
       }
     };
+    console.log(value);
+    return value;
   },
 
   afterInstall: function(options) {
@@ -60,9 +62,9 @@ function getPathParts(options) {
   let pathParts = [options.project.root];
 
   if (options.dummy && options.project.isEmberCLIAddon()) {
-    pathParts = pathParts.concat(['tests', 'dummy', 'app', 'reducers']);
+    pathParts = pathParts.concat(['tests', 'dummy', 'app', 'redux', 'middleware']);
   } else {
-    pathParts = pathParts.concat(['app', 'reducers']);
+    pathParts = pathParts.concat(['app', 'redux', 'middleware']);
   }
 
   return pathParts;

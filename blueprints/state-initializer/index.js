@@ -1,6 +1,6 @@
 /*jshint node:true*/
 'use strict';
-const fs          = require('fs-extra');
+const fs          = require('fs');
 const path        = require('path');
 const chalk       = require('chalk');
 
@@ -58,9 +58,9 @@ function getPathParts(options) {
   let pathParts = [options.project.root];
 
   if (options.dummy && options.project.isEmberCLIAddon()) {
-    pathParts = pathParts.concat(['tests', 'dummy', 'app', 'state-initializers']);
+    pathParts = pathParts.concat(['tests', 'dummy', 'app', 'redux', 'state-initializers']);
   } else {
-    pathParts = pathParts.concat(['app', 'state-initializers']);
+    pathParts = pathParts.concat(['app', 'redux', 'state-initializers']);
   }
 
   return pathParts;
