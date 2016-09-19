@@ -1,0 +1,39 @@
+/*jshint esversion:6, node:true*/
+const fs          = require('fs');
+const path        = require('path');
+const chalk       = require('chalk');
+const tools       = require('../redux-file-utils');
+
+module.exports = {
+
+  description: 'Manages the middleware modules used in the Redux store.',
+
+  fileMapTokens: function(options) {
+    return {
+      __root__: tools.rootToken(this),
+      __app__: tools.appToken(this),
+      __redux__: tools.reduxToken(this)
+    };
+  },
+
+  afterInstall: function(options) {
+    manage.call(this, 'add', options);
+  },
+
+  afterUninstall: function(options) {
+    manage.call(this, 'remove', options);
+  }
+
+};
+
+function manage(action, options) {
+  tools.manage(this, {
+    type: 'middleware',
+    wrapperFunction: null,
+    isArray: true,
+    propertyPassedToValue: false,
+    externalDeps: () => '',
+    action, // aka, 'add' or 'remove'
+    options,
+  });
+}

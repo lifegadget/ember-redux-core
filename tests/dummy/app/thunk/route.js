@@ -1,6 +1,6 @@
 import Ember from 'ember';
 import ajax from 'dummy/utilities/ajax';
-import route from 'ember-redux/route';
+import route from 'ember-redux-core/route';
 
 // A redux-thunk action creator to load users.
 function loadUsers() {
