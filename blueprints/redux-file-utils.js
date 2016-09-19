@@ -30,8 +30,13 @@ function pathAddonVersusApp(context, isAddon) {
 }
 
 const manage = function manage(context, config) {
-  const { type, action, options, externalDeps } = config;
-  const typeSingular = type.substr(-1);
+  const { type, action, options, externalDeps, wrapperFunction, isArray, propertyPassedToValue } = config;
+  const singularNames = {
+    reducers: 'Reducer',
+    middleware: 'Middleware',
+    ['static-initializers']: 'Static Initializer'
+  };
+  const typeSingular = singularNames[type];
   const name = options.entity.name;
   const fileContents = loadFile(findFile(type, options));
   const verb = action === 'add' ? 'adding ' : 'removing ';
@@ -45,7 +50,7 @@ const manage = function manage(context, config) {
 
   saveMasterFile(
     findFile(type, options),
-    onlyOnce + fileContents.aboveFold + generateImports(modules) + generateExports(modules)
+    onlyOnce + fileContents.aboveFold + generateImports(modules) + generateExports(modules, config)
   );
 };
 
@@ -94,15 +99,22 @@ function loadFile(fileName) {
 
 function generateImports(modules) {
   return '\n\n' + modules.map(m => {
-    return `import ${m} from './${m}';\n`
+    return `import ${m} from './${m}';\n`;
   }).join('');
 }
 
-function generateExports(modules) {
-  const prolog = '\n\nexport default combineReducers({\n';
-  const epilog = '\n});';
+function generateExports(modules, config) {
+  let { wrapperFunction, isArray, propertyPassedToValue } = config;
+  const blockStart = isArray ? '[' : '{';
+  const blockEnd = isArray ? ']' : '}';
+  wrapperFunction = wrapperFunction ? wrapperFunction + '(' : '';
+  const prolog = `\nexport default ${wrapperFunction}${blockStart}\n`;
+  const epilog = `\n${blockEnd}${wrapperFunction ? ')' : ''};`;
   const content = modules.map(m => {
-    return `  ${m}`;
+    const moduleDef = propertyPassedToValue
+      ? `  ${m}: ${m}(${propertyPassedToValue})`
+      : `  ${m}`;
+    return moduleDef;
   }).join(',\n');
 
   return prolog + content + epilog;

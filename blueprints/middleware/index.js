@@ -1,106 +1,39 @@
-/*jshint node:true*/
-'use strict';
+/*jshint esversion:6, node:true*/
 const fs          = require('fs');
 const path        = require('path');
 const chalk       = require('chalk');
+const tools       = require('../redux-file-utils');
 
 module.exports = {
-  description: 'Generates a reducer for Redux.',
+
+  description: 'Manages the middleware modules used in the Redux store.',
 
   fileMapTokens: function(options) {
-    var self = this;
-    const value = {
-      __root__: function(options) {
-        if (!!self.project.config()['ember-redux'] && !!self.project.config()['ember-redux'].directory) {
-          return self.project.config()['ember-redux'].directory;
-        } else if (options.inAddon) {
-          return path.join('tests', 'dummy', 'app');
-        } else {
-          return '/app';
-        }
-      }
+    return {
+      __root__: tools.rootToken(this),
+      __app__: tools.appToken(this),
+      __redux__: tools.reduxToken(this)
     };
-    console.log(value);
-    return value;
   },
 
   afterInstall: function(options) {
-    updateReducers.call(this, 'add', options);
+    manage.call(this, 'add', options);
   },
+
   afterUninstall: function(options) {
-    updateReducers.call(this, 'remove', options);
+    manage.call(this, 'remove', options);
   }
 
 };
 
-function updateReducers(action, options) {
-  const name = options.entity.name;
-  const fileContents = loadFile(findFile(options));
-  const verb = action === 'add' ? 'adding ' : 'removing ';
-  const color = action === 'add' ? 'green' : 'red';
-  const direction = action === 'add' ? 'to' : 'from';
-  const modules = getModules(findDirectory(options));
-  const combineReducers = fileContents.aboveFold.indexOf('import redux from') === -1 ? `import redux from 'npm:redux';\nconst { combineReducers } = redux;\n\n` : '';
-
-  this.ui.writeLine( `  ${chalk[color](verb)} "${chalk.bold(name)}" ${direction} master reducer file [${chalk.grey('reducers/index.js')}]`);
-  saveFile( findFile(options), combineReducers + fileContents.aboveFold + generateImports(modules) + generateExports(modules) );
-}
-
-function findFile(options) {
-  return path.join(...getPathParts(options).concat(['index.js']));
-}
-
-function findDirectory(options) {
-  return path.join(...getPathParts(options));
-}
-
-function saveFile(fileName, content) {
-  fs.writeFileSync(fileName, content, { encoding: 'utf8'});
-}
-
-function getPathParts(options) {
-  let pathParts = [options.project.root];
-
-  if (options.dummy && options.project.isEmberCLIAddon()) {
-    pathParts = pathParts.concat(['tests', 'dummy', 'app', 'redux', 'middleware']);
-  } else {
-    pathParts = pathParts.concat(['app', 'redux', 'middleware']);
-  }
-
-  return pathParts;
-}
-
-function loadFile(fileName) {
-  const contents = fs.readFileSync(fileName, 'utf-8');
-  if(contents.indexOf(' */') === -1) {
-    return {
-      aboveFold: '',
-      belowFold: contents
-    }
-  } else {
-    return {
-      aboveFold: contents.split(' */')[0] + ' */',
-      belowFold: contents.split(' */')[1]
-    }
-  }
-}
-
-function getModules(directory) {
-  return fs.readdirSync(directory, 'utf8').filter( f => f !== 'index.js' ).map( f => f.replace('.js', ''));
-}
-
-function generateImports(modules) {
-  return '\n\n' + modules.map(m => {
-    return `import ${m} from './${m}';\n`
-  }).join('');
-}
-
-function generateExports(modules) {
-  const prolog = '\n\nexport default combineReducers({\n';
-  const epilog = '\n});';
-  const content = modules.map(m => {
-    return `  ${m}`;
-  }).join(',\n');
-
-  return prolog + content + epilog;
+function manage(action, options) {
+  tools.manage(this, {
+    type: 'middleware',
+    wrapperFunction: null,
+    isArray: true,
+    propertyPassedToValue: false,
+    externalDeps: () => '',
+    action, // aka, 'add' or 'remove'
+    options,
+  });
 }
