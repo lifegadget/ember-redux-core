@@ -1,3 +1,4 @@
+import config from 'ember-get-config';
 import Ember from 'ember';
 /**
  * For many Ember apps you may choose to ignore the state-initializer but
@@ -18,6 +19,7 @@ import Ember from 'ember';
  * Using these two commands will ensure that this file is managed for you.
  */
 
-Ember.debug('You are using the main state-initializer from ember-redux-core rather than your local redux folder; this is probably unintentional. Run "ember generate ember-redux-core" to restore the main state-initializers in your local redux folder');
 
-export default () => {};
+export default {
+
+};

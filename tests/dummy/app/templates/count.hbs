@@ -1,0 +1,37 @@
+{{#markdown-convert style='github'}}
+# Count Demo
+> Showing simple state change through a numeric sub-section of state
+
+## Overview
+
+Under the global state object, there is a state property called `state.count` which we will be manipulating in this demo through the following
+Redux actions:
+
+- `COUNT_ADD` - adds one to the current value
+- `COUNT_SUBTRACT` - subtracts one from the current state value
+- `COUNT_RESET` - resets the counter to a 0 value
+
+If you want to follow along with the code:
+
+- `dummy/app/reducers/count.js` - reducer which handles all of the actions above
+
+
+## Demo
+
+{{/markdown-convert}}
+
+<div class="demo">
+  <div class="value">
+    {{get state 'count'}}
+  </div>
+  <div class="action-buttons">
+    {{ui-button 'Add' }}
+    {{ui-button 'Remove'}}
+    {{ui-button 'Reset' mood='danger'}}
+  </div>
+</div>
+<br>
+{{#markdown-convert style='github'}}
+  > **Note**: if you have the [Redux debugger](https://github.com/zalmoxisus/redux-devtools-extension#usage) you can use this with this demo to both fire actions as well as monitor
+  actions come in and state change
+{{/markdown-convert}}

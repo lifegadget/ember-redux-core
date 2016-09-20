@@ -1,4 +1,3 @@
-import Ember from 'ember';
 /**
  * This is the master reducer, it partitions the jobs amounts
  * one or more other reducers which take on responsibility for
@@ -13,7 +12,10 @@ import Ember from 'ember';
  * Note: only VERY small applications should be managed by a single
  * reducer file.
  */
+const defaultState = {};
 
-Ember.debug('You are using the main reducer in ember-redux-core; this is probably unintentional. In most cases running "ember generate ember-redux-core" should restore the main reducer in your app\'s redux/reducers folder');
+const reducer = (state, action) => {
+  return defaultState;
+}
 
-export default (store, action) => store;
+export default reducer;
