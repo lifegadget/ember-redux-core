@@ -11,24 +11,19 @@
  * a default value for state and handle all unknown
  * actions by returning the state back unchanged.
  */
-const defaultState = {};
+const defaultState = 0;
 const reducer = (state, action) => {
 
   switch(action.type) {
 
-    case 'FOO':
-      return Ember.assign({}, state, {
-        uno: 1,
-        dos: 2,
-        tres: 3
-      });
+    case 'COUNT_ADD':
+      return state + 1;
 
-    case 'BAR':
-      return Ember.assign({}, state, {
-        uno: 0,
-        dos: 0,
-        tres: 0
-      });
+    case 'COUNT_SUBTRACT':
+      return state - 1;
+
+    case 'COUNT_RESET':
+      return 0;
 
     default:
       return state || defaultState;

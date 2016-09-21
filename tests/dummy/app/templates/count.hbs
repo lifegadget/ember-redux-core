@@ -2,19 +2,22 @@
 # Count Demo
 > Showing simple state change through a numeric sub-section of state
 
-## Overview
+## Introduction
 
 Under the global state object, there is a state property called `state.count` which we will be manipulating in this demo through the following
 Redux actions:
 
 - `COUNT_ADD` - adds one to the current value
 - `COUNT_SUBTRACT` - subtracts one from the current state value
-- `COUNT_RESET` - resets the counter to a 0 value
+- `COUNT_RESET` - resets the counter to a _zero_ value
 
 If you want to follow along with the code:
 
-- `dummy/app/reducers/count.js` - reducer which handles all of the actions above
+- `/route/count.js` - very simple example since there is zero business logic tied to the action; had the complexity increased enough or if there was high reuse for this type of change cross-component then it would be more appropriately handled with the `count.hbs` template calling into an action-helper rather than the route.
+- `/redux/reducers/count.js` - this reducer is responisible for all state under "count" in the state tree. This is a simple model so it just means it manages a number.
+- `/redux/state-initializer/count.js` - because we wanted to sexy-up this demo we've added an initializer which ensures that state is maintained with a browser reload. It does this by managing state in localStorage.
 
+> **Note**: if you have the [Redux debugger](https://github.com/zalmoxisus/redux-devtools-extension#usage) you can use this with this demo to both fire actions as well as monitor actions and state change
 
 ## Demo
 
@@ -22,16 +25,11 @@ If you want to follow along with the code:
 
 <div class="demo">
   <div class="value">
-    {{get state 'count'}}
+    {{count}}
   </div>
   <div class="action-buttons">
-    {{ui-button 'Add' }}
-    {{ui-button 'Remove'}}
-    {{ui-button 'Reset' mood='danger'}}
+    {{ui-button 'Add' onClick=(route-action 'add')}}
+    {{ui-button 'Subtract' onClick=(route-action 'subtract')}}
+    {{ui-button 'Reset' onClick=(route-action 'reset') mood='danger'}}
   </div>
 </div>
-<br>
-{{#markdown-convert style='github'}}
-  > **Note**: if you have the [Redux debugger](https://github.com/zalmoxisus/redux-devtools-extension#usage) you can use this with this demo to both fire actions as well as monitor
-  actions come in and state change
-{{/markdown-convert}}

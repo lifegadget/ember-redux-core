@@ -1,5 +1,5 @@
-/*jshint node:true*/
-var path = require('path');
+const path        = require('path');
+const tools       = require('../redux-file-utils');
 
 module.exports = {
   description: 'Installation blueprint for ember-redux',
@@ -12,33 +12,17 @@ module.exports = {
       ]
     }).then(function() {
       return this.addPackagesToProject([
-        {name: 'redux', target: '^3.5.2'},
-        {name: 'redux-thunk', target: '^2.1.0'}
+        {name: 'redux', target: '^3.5.2'}
       ]);
     }.bind(this));
   },
 
-  fileMapTokens: function() {
-    var self = this;
+ fileMapTokens: function(options) {
     return {
-      __root__: function(options) {
-        if (!!self.project.config()['ember-redux'] && !!self.project.config()['ember-redux'].directory) {
-          return self.project.config()['ember-redux'].directory;
-        } else if (options.inAddon) {
-          return path.join('tests', 'dummy');
-        } else {
-          return '/';
-        }
-      },
-      __app__: function(options) {
-        if (!!self.project.config()['ember-redux'] && !!self.project.config()['ember-redux'].directory) {
-          return self.project.config()['ember-redux'].directory;
-        } else if (options.inAddon) {
-          return path.join('tests', 'dummy', 'app');
-        } else {
-          return '/app';
-        }
-      }
+      __root__: tools.rootToken(this),
+      __app__: tools.appToken(this),
+      __redux__: tools.reduxToken(this)
     };
-  }
+  },
+
 };

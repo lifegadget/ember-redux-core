@@ -3,7 +3,7 @@ import reducers from './reducers/index';
 import enhancers from './enhancers/index';
 import middleware from './middleware/index';
 import initialState from './state-initializers/index';
-const config = {};
+import config from 'ember-get-config';
 
 const { createStore, applyMiddleware, compose } = redux;
 const devTools = window.devToolsExtension ? window.devToolsExtension() : f => f;

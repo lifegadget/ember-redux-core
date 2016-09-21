@@ -1,3 +1,4 @@
+import Ember from 'ember';
 /**
  * This reducer takes in the localised state which
  * is owned by this reducer; it's job is create a
@@ -21,13 +22,6 @@ const reducer = (state, action) => {
         uno: 1,
         dos: 2,
         tres: 3
-      });
-
-    case 'BAR':
-      return Ember.assign({}, state, {
-        uno: 0,
-        dos: 0,
-        tres: 0
       });
 
     default:

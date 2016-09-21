@@ -1,1 +1,35 @@
-index
+{{#markdown-convert style='github'}}
+
+
+# Overview
+
+This Ember addon is meant to make the transition to Redux easy and straight forward in a manner which _exposes_ everything to the consumer of the addon rather than performaing fancy magic behind curtains. Now I know we all love magic but really magic isn't needed for Redux ... it is powerful AND it is actually quite simple too. Furthermore, the popularity and it's founder (Dan Abranov) have contributed a ton of very good literature and video tutorials to help you grasp the power and use of this state system.
+
+### Standing on the shoulders of giants
+
+Before going any further I think it is worth stopping to say that this addon is another classic example of "standing on the shoulders of giants". Dan Abranov is a well spoken creator and advocate of Redux but he'll never shy away from telling you that the Redux solution takes many of it's ideas from the Elm programming language. In turn I recently heard the Elm creator, Evan Czaplicki, say recently in a podcast that his ideas in turn were taken in part from classic functional programming theories. With this metaphor in hand let me start by saying that this addon was inspired by Toran Billup's [`ember-redux`](http://www.ember-redux.com/) addon. His addon was instrumental in my believing that the cost of using Redux in Ember was containable.
+
+While I had initially hoped that my contribution to the Ember communitity would just be PR's to Toran's effort it turns out that we both plan on being heavy users of our own respective addons (which in my case means I'm stubborn) and some of our views were different enough that it made more sense to go in different directions at least for now. Hopefully this will not serve as a _distraction_ to Embereños so much as _optionality_.
+
+### Goals for this Addon
+
+The primary objective I set out for on in this addon was:
+
+- **make** using **Redux** in Ember **super easy**
+
+Beyond that, distinguishing characteristics include:
+
+- `smart blueprints` - I wanted to build a set of ember-cli blueprints which will help create/destroy all of the possible Redux artifacts (reducers, middleware, enhancers, etc.). The goal was that for beginners it would be able to provide a little bit of structure and documentation which would aid in moving to this new state management solution. For more advanced users it would provide an automated linking/aggregation of files that would speed development.
+- `single entry point` - when using this Addon, all new file types in Redux will be contained off a single entry point of `app/redux/...` with the hope that this helps developers to navigate and manage their Redux environment.
+- `KISS and composability` - while I would love to benefit from popular Redux _enhancers_ or _middlewares_ I feel the core module should *only* try to incorporate the core Redux functionality while providing a clear and opinionated mechanism for adding new features.
+- `no magic` - there are plenty of cases where an Addon provides value by abstracting a lot of what is happening behind its own curtains but Redux is fundamentally a simple framework and all of the _things_ that this addon does are things that consumers gain more benefit from _seeing_ than
+- `state initializers` - Redux provides a feature which I am referring to as "state initializers" (but is sometimes referred to as _preloaded state_ or various other monikers). Regardless of terminology, for offline apps this feature is very attractive and I've added it as a first class citizen to this Addon.
+- `typescript` - the Redux service has been done in Typescript which will provide a typescript header file to Javascript and Typescript consumers alike. This is _very_ lightweight and hopefully won't stop anyone from understanding/grokking what's happening here.
+
+{{/markdown-convert}}
+
+<br>
+<div class="next-section">
+  <div>Next up ... </div>
+  <div>{{ui-button 'Docs > Installation' onClick=(route-action 'navigate' 'install-and-config') }}</div>
+</div>

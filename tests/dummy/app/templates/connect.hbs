@@ -1,0 +1,19 @@
+{{#markdown-convert style='github'}}
+# Connection
+> Connecting Routes, Components, and Controllers to State and Dispatch
+
+## Different strokes for different folks
+
+Your Components, Routes, and Controllers are in the need of state (initial and updates) and access to `dispatch` functionality to create state change. This section will describe how to achieve this with **ember-redux-core**.
+
+If you were developing in React you'd probably use the `connect()` function off of the **react-redux** api surface. If you have come from **ember-redux** you'll know that that repo has been very faithful to the React design but with ember-redux-core we have made a few Ember-enabled departures. The variation was done with the intent of doing things in a way which ember developers will be more familiar/comfortable with. There is no "right way" here as Redux has no strict say on how you bridge between it's stage management and the JS framework you're using.
+
+> Hopefully you'll find this intuitive but if you see better ways of achieving this feel free to drop an issue or (ideally) a PR with your thoughts sketched out.
+
+## The Dao of `ember-redux-core` connection
+
+The diagram below shows at a high-level the interaction that will take place between your containers (route, component, or controller) and the `redux` service provided by this addon.
+
+![](images/connection.jpg)
+
+{{/markdown-convert}}
