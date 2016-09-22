@@ -1,5 +1,7 @@
 import Ember from 'ember';
 import reduxStore from '../redux/storeConfig';
+import initialState from '../redux/state-initializers/index';
+
 const { get, set, A, computed, typeOf } = Ember;
 const a = A;
 
@@ -133,7 +135,11 @@ const redux = Ember.Service.extend({
    * the part of state which changed
    */
   _notifyInitializers(pre, post) {
-    // TODO implement
+    Object.keys(initialState).map(key => {
+      if(get(pre, key) !== get(post, key)) {
+        initialState[key].saveState(pre, post);
+      }
+    });
   },
 
   /**

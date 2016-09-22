@@ -37,9 +37,5 @@ function manage(action, options) {
     externalDeps: () => ``,
     action,
     options,
-    // inClosing: fs.readFileSync(path.join(
-    //   options.project.root,
-    //   'node_modules/ember-redux-core/blueprints/state-initializer/in-closing-template.js'
-    //   ), { encoding: 'utf8'})
   });
 }

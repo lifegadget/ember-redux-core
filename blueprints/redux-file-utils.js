@@ -120,25 +120,6 @@ function generateImports(modules, useNamedInputs) {
   return prolog + body.join('');
 }
 
-// function addFunctions(definitions) {
-//   const separator = '\n\n';
-//   const parts = [];
-//   if(!definitions) {
-//     return '';
-//   }
-//   if(!definitions.map) {
-//     definitions = [ definitions ];
-//   }
-
-//   definitions.map(def => {
-//     if (def.prolog) { parts.push(def.prolog); }
-//     parts.push(def.body);
-//     if (def.epilog) { parts.push(def.epilog); }
-
-//   });
-
-// }
-
 function generateExports(modules, config) {
   let { wrapperFunction, isArray, propertyPassedToValue } = config;
   const blockStart = isArray ? '[' : '{';

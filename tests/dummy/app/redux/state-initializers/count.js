@@ -1,3 +1,4 @@
+import Ember from 'ember';
 /**
  * A state-initializer is used to load the initial state when the app first starts
  * ( aka, when the store is created with `createStore()` ). The aim of initializing
@@ -12,10 +13,16 @@
  *
  * loads state for the "fobart" section of the global state tree
  */
-const loadState = (config) => {
-  const { environment, modulePrefix } = config;
-
-  return 0;
+const loadState = () => {
+  try {
+    const serializedState = window.localStorage.getItem('count');
+    if (serializedState === null) {
+      return undefined;
+    }
+    return Number(serializedState);
+  } catch (err) {
+    Ember.debug('There was a problem getting data out of localStorage: ', err);
+  }
 };
 
 /**
@@ -26,10 +33,12 @@ const loadState = (config) => {
  * specifically within the scope that this initializer manages.
  */
 const saveState = (pre, post) => {
-
-  // TODO: do something with the change information; if it's not relevant then
-  // leave the export as-is
-
+  try {
+    console.log('setting to: ', post);
+    window.localStorage.setItem('count', Number(post.count));
+  } catch (err) {
+    Ember.debug('There was a problem saving data to localStorage: ', err);
+  }
 };
 
 export {
