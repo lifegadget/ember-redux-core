@@ -1,5 +1,5 @@
 html, body {
-  font-family: arial;
+  font-family: Arial,Helvetica Neue,Helvetica,sans-serif;
   display: flex;
   flex-direction: row;
   justify-content: center;

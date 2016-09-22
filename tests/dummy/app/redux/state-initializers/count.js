@@ -34,7 +34,6 @@ const loadState = () => {
  */
 const saveState = (pre, post) => {
   try {
-    console.log('setting to: ', post);
     window.localStorage.setItem('count', Number(post.count));
   } catch (err) {
     Ember.debug('There was a problem saving data to localStorage: ', err);
