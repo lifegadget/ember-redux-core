@@ -94,7 +94,7 @@ const redux = Ember.Service.extend({
    */
   _notify(pre, post) {
     const stateInterest = this.get('_stateInterests');
-    Object.keys(stateInterest).map((key, index) => {
+    Object.keys(stateInterest).map(key => {
       if(get(pre, key) !== get(post, key)) {
         stateInterest[key].map(container => {
           this._setState(container._reduxRegistration, key);
@@ -114,13 +114,9 @@ const redux = Ember.Service.extend({
     const container = this.registry.filter(r => r.id === id)[0];
     const prop = key.indexOf(/\w+as\w+/) === -1 ? key.split('.').pop() : key.replace(/.*as\w+/, '');
     const value = key.indexOf(/\w+as\w+/) === -1 ? get(this.getState(), key) : key.replace(/.*as\w+/, '');
-    const isRouter = get(container, 'didTransition') ? true : false;
     const routeName = get(container, 'context.routeName');
-    const target = routeName ? container.context.controllerFor(routeName) : container.context;
+    const target = container.context._isRoute ? container.context.controllerFor(routeName) : container.context;
 
-    console.log('is router: ', isRouter, clone(container.context));
-
-    console.log('stateInterest', container, container.context.stateInterest);
     if(!a(clone(get(container.context, 'stateInterest'))).includes(key)) {
       debug(`Warning: setting state section "${key}" which is not registered in "${id}" as a stateInterest`);
     }

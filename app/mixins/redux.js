@@ -11,7 +11,20 @@ const redux = Ember.Mixin.create({
 
   init() {
     this._super(...arguments);
-    this._connect();
+    this._isRoute = get(this, 'store') ? true : false;
+    if(!this._isRoute) {
+      this._connect();
+    }
+  },
+
+  /**
+   * If the container is a route we must wait until the beforeModel
+   * hook is called before the `routeName` property will have been resolved.
+   */
+  beforeModel() {
+    this._super(...arguments);
+    console.log(Ember.assign({}, this));
+    Ember.run.later(this._connect.bind(this), 0);
   },
 
   willDestroyElement() {
