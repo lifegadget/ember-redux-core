@@ -72,12 +72,10 @@ const redux = Ember.Service.extend({
     const pre = this.store.getState();
     this.store.dispatch(action);
     const post = this.store.getState();
-    // this._notifyContainers(pre, post);
     this.reduxSubscribers.map(fn => fn(pre, post));
   },
   subscribe(func) {
     this.reduxSubscribers.push(func);
-    // return this.store.subscribe(func);
   },
 
   /**

@@ -17,4 +17,21 @@
  * Using these two commands will ensure that this file is managed for you.
  */
 
-export default () => {};
+const modules = [];
+
+export function loadState(config) {
+  const state = {};
+  modules.map(m => {
+    state[m] = this[m].loadState(config);
+  });
+
+  return state;
+}
+
+export function saveState(pre, post) {
+  modules.map(m => {
+    if(get(pre, m) !== get(post, m)) {
+      get(this, m).saveState(pre, post);
+    }
+  });
+}

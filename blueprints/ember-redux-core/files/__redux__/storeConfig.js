@@ -10,5 +10,5 @@ const devTools = window.devToolsExtension ? window.devToolsExtension() : f => f;
 const createStoreWithMiddleware = compose(applyMiddleware(...middleware), devTools, enhancers)(createStore);
 
 export default function() {
-  return createStoreWithMiddleware(reducers, initialState(config));
+  return createStoreWithMiddleware(reducers, initialState.loadState(config));
 }

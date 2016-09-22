@@ -1,3 +1,5 @@
+import Ember from 'ember';
+const { get } = Ember;
 /**
  * For many Ember apps you may choose to ignore the state-initializer but
  * with a growing tendency for offline applications it is becoming increasingly
@@ -17,4 +19,8 @@
  * Using these two commands will ensure that this file is managed for you.
  */
 
-export default () => {};
+import * as count from './count';
+
+export default {
+  count
+};

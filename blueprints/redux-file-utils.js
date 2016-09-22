@@ -34,7 +34,7 @@ const manage = function manage(context, config) {
   const singularNames = {
     reducers: 'Reducer',
     middleware: 'Middleware',
-    ['static-initializers']: 'Static Initializer'
+    ['state-initializers']: 'Static Initializer'
   };
   const typeSingular = singularNames[type];
   const name = options.entity.name;
@@ -43,7 +43,7 @@ const manage = function manage(context, config) {
   const color = action === 'add' ? 'green' : 'red';
   const direction = action === 'add' ? 'to' : 'from';
   const modules = getModules(findDirectory(type, options));
-  const modulesListOutput = outputModuleList ? buildModulesList(modules) : '';
+  const modulesListOutput = outputModuleList ? '\n' + buildModulesList(modules) : '';
   const dependencies = externalDeps(modules.length);
   const onlyOnce = fileContents.aboveFold.indexOf(dependencies) === -1 ? dependencies : '';
 
@@ -57,15 +57,15 @@ const manage = function manage(context, config) {
       generateImports(modules, useNamedInputs) +
       modulesListOutput +
       generateExports(modules, config) +
-      inClosing ? inClosing : ''
+      (inClosing ? '\n\n' + inClosing : '')
     )
   );
 };
 
 function buildModulesList(modules) {
   const prolog = 'const modules = [\n';
-  const epilog = '];';
-  const body = modules.join(',\n');
+  const epilog = '\n];\n';
+  const body = modules.map(m => `  ${m}`).join(',\n');
 
   return prolog + body + epilog;
 }
@@ -95,7 +95,7 @@ function getModules(directory) {
 }
 
 function saveMasterFile(fileName, content) {
-  fs.writeFileSync(fileName, content, { encoding: 'utf8'});
+  fs.writeFileSync(fileName, content, { encoding: 'utf8' });
 }
 
 function loadFile(fileName) {
@@ -119,6 +119,25 @@ function generateImports(modules, useNamedInputs) {
 
   return prolog + body.join('');
 }
+
+// function addFunctions(definitions) {
+//   const separator = '\n\n';
+//   const parts = [];
+//   if(!definitions) {
+//     return '';
+//   }
+//   if(!definitions.map) {
+//     definitions = [ definitions ];
+//   }
+
+//   definitions.map(def => {
+//     if (def.prolog) { parts.push(def.prolog); }
+//     parts.push(def.body);
+//     if (def.epilog) { parts.push(def.epilog); }
+
+//   });
+
+// }
 
 function generateExports(modules, config) {
   let { wrapperFunction, isArray, propertyPassedToValue } = config;

@@ -31,15 +31,15 @@ function manage(action, options) {
     type: 'state-initializers',
     wrapperFunction: null,
     useNamedInputs: true,
-    outputModuleList: true,
+    outputModuleList: false,
     isArray: false,
     propertyPassedToValue: false,
-    externalDeps: () => `import Ember from 'ember';\nimport config from 'ember-get-config';\nconst { get } = Ember;\n`,
+    externalDeps: () => ``,
     action,
     options,
-    inClosing: fs.readFileSync(path.join(
-      options.project.root,
-      'node_modules/ember-redux-core/blueprints/state-initializer/in-closing-template.js'
-      ), { encoding: 'utf8'})
+    // inClosing: fs.readFileSync(path.join(
+    //   options.project.root,
+    //   'node_modules/ember-redux-core/blueprints/state-initializer/in-closing-template.js'
+    //   ), { encoding: 'utf8'})
   });
 }
