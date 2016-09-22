@@ -1,6 +1,6 @@
 import Ember from 'ember';
 import reduxStore from '../redux/storeConfig';
-const { get, set, A, computed, debug, typeOf } = Ember;
+const { get, set, A, computed, typeOf } = Ember;
 const a = A;
 
 const clone = (thingy) => {
@@ -33,6 +33,7 @@ const redux = Ember.Service.extend({
    * A registry organised by container registration
    */
   registry: a([]),
+  reduxSubscribers: [],
   /**
    * Returns the registry organised in an inverted fashion
    * which is more effective for addressing change states
@@ -61,6 +62,8 @@ const redux = Ember.Service.extend({
   init() {
     this._super(...arguments);
     this.store = reduxStore();
+    this.subscribe(this._notifyContainers.bind(this));
+    this.subscribe(this._notifyInitializers.bind(this));
   },
   getState() {
     return this.store.getState();
@@ -69,10 +72,12 @@ const redux = Ember.Service.extend({
     const pre = this.store.getState();
     this.store.dispatch(action);
     const post = this.store.getState();
-    this._notify(pre, post);
+    // this._notifyContainers(pre, post);
+    this.reduxSubscribers.map(fn => fn(pre, post));
   },
   subscribe(func) {
-    return this.store.subscribe(func);
+    this.reduxSubscribers.push(func);
+    // return this.store.subscribe(func);
   },
 
   /**
@@ -106,12 +111,13 @@ const redux = Ember.Service.extend({
   },
 
   /**
-   * _notify
+   * _notifyContainers
    *
-   * An internal API that notifies observers of a change
-   * to those properties they've expressed interest in
+   * Communicates changes to state to containers who have
+   * expressed interest through their stateInterest property
    */
-  _notify(pre, post) {
+  _notifyContainers(pre, post) {
+    // containers
     const stateInterests = this.get('_stateInterests');
     Object.keys(stateInterests).map(id => {
       if(get(pre, id) !== get(post, id)) {
@@ -120,6 +126,16 @@ const redux = Ember.Service.extend({
         });
       }
     });
+  },
+
+  /**
+   * _notifyInitializers
+   *
+   * Communicates changes to state-initializers who are managing
+   * the part of state which changed
+   */
+  _notifyInitializers(pre, post) {
+    // TODO implement
   },
 
   /**
