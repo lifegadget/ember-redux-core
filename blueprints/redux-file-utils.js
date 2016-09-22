@@ -30,7 +30,7 @@ function pathAddonVersusApp(context, isAddon) {
 }
 
 const manage = function manage(context, config) {
-  const { type, action, options, externalDeps, wrapperFunction, isArray, propertyPassedToValue } = config;
+  const { type, action, options, externalDeps, wrapperFunction, isArray, propertyPassedToValue, outputModuleList, useNamedInputs, inClosing } = config;
   const singularNames = {
     reducers: 'Reducer',
     middleware: 'Middleware',
@@ -43,6 +43,7 @@ const manage = function manage(context, config) {
   const color = action === 'add' ? 'green' : 'red';
   const direction = action === 'add' ? 'to' : 'from';
   const modules = getModules(findDirectory(type, options));
+  const modulesListOutput = outputModuleList ? buildModulesList(modules) : '';
   const dependencies = externalDeps(modules.length);
   const onlyOnce = fileContents.aboveFold.indexOf(dependencies) === -1 ? dependencies : '';
 
@@ -50,9 +51,24 @@ const manage = function manage(context, config) {
 
   saveMasterFile(
     findFile(type, options),
-    onlyOnce + fileContents.aboveFold + generateImports(modules) + generateExports(modules, config)
+    (
+      onlyOnce +
+      fileContents.aboveFold +
+      generateImports(modules, useNamedInputs) +
+      modulesListOutput +
+      generateExports(modules, config) +
+      inClosing ? inClosing : ''
+    )
   );
 };
+
+function buildModulesList(modules) {
+  const prolog = 'const modules = [\n';
+  const epilog = '];';
+  const body = modules.join(',\n');
+
+  return prolog + body + epilog;
+}
 
 function getPathParts(type, options) {
   let pathParts = [options.project.root];
@@ -97,10 +113,11 @@ function loadFile(fileName) {
   }
 }
 
-function generateImports(modules) {
-  return '\n\n' + modules.map(m => {
-    return `import ${m} from './${m}';\n`;
-  }).join('');
+function generateImports(modules, useNamedInputs) {
+  const prolog = '\n\n';
+  const body = useNamedInputs ? modules.map(m=>`import * as ${m} from './${m}';\n`) : modules.map(m=>`import ${m} from './${m}';\n`);
+
+  return prolog + body.join('');
 }
 
 function generateExports(modules, config) {
@@ -124,5 +141,6 @@ module.exports = {
     manage,
     rootToken,
     appToken,
-    reduxToken
+    reduxToken,
+    findDirectory
 };

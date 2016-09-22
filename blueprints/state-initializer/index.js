@@ -30,10 +30,16 @@ function manage(action, options) {
   tools.manage(this, {
     type: 'state-initializers',
     wrapperFunction: null,
+    useNamedInputs: true,
+    outputModuleList: true,
     isArray: false,
-    propertyPassedToValue: 'config',
-    externalDeps: () => `import config from 'ember-get-config';\n`,
+    propertyPassedToValue: false,
+    externalDeps: () => `import Ember from 'ember';\nimport config from 'ember-get-config';\nconst { get } = Ember;\n`,
     action,
     options,
+    inClosing: fs.readFileSync(path.join(
+      options.project.root,
+      'node_modules/ember-redux-core/blueprints/state-initializer/in-closing-template.js'
+      ), { encoding: 'utf8'})
   });
 }
