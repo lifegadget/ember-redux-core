@@ -2,7 +2,7 @@ import Ember from 'ember';
 import redux from '../mixins/redux';
 
 export default Ember.Route.extend(redux, {
-  stateInterest: ['count'],
+  stateInterest: ['count', 'count as foobar', 'count as baz'],
 
   actions: {
     add() {

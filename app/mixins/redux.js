@@ -23,7 +23,6 @@ const redux = Ember.Mixin.create({
    */
   beforeModel() {
     this._super(...arguments);
-    console.log(Ember.assign({}, this));
     Ember.run.later(this._connect.bind(this), 0);
   },
 
@@ -41,6 +40,9 @@ const redux = Ember.Mixin.create({
    * so they may be updated with state (initial and updated)
    */
   _connect() {
+    if(this._reduxRegistration) {
+      return;
+    }
     const id = v4();
     const keys = get(this, 'stateInterest');
     this.get('redux').connect(id, this, keys);
@@ -49,6 +51,7 @@ const redux = Ember.Mixin.create({
 
   _disconnect() {
     this.get('redux').disconnect(this._reduxRegistration);
+    this._reduxRegistration = null;
   },
 
   _getController() {

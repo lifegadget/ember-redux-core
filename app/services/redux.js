@@ -17,6 +17,17 @@ const clone = (thingy) => {
   }
 };
 
+const decomposeKey = function(key) {
+  const parts = key.split('.');
+  const prop = clone(parts).pop();
+  const hasAlias = clone(parts).pop().indexOf(' as ') !== -1;
+  return {
+    prop: hasAlias ? prop.replace(/\s+as\s+.*/, '') : prop,
+    alias: hasAlias ? prop.replace(/.*\s+as\s+/, '') : prop,
+    path: key.replace(/\s+as\s+.*/, '')
+  };
+};
+
 const redux = Ember.Service.extend({
   /**
    * A registry organised by container registration
@@ -30,10 +41,17 @@ const redux = Ember.Service.extend({
     const interests = {};
     this.registry.map( registry => {
       registry.keys.map(key => {
-        if(!get(interests, key)) {
-          interests[key] = [];
+        const { prop, alias, path } = decomposeKey(key);
+        if(!get(interests, prop)) {
+          interests[prop] = [];
         }
-        interests[key].push(registry.context);
+        interests[path].push({
+          container: registry.context,
+          alias: alias,
+          prop: prop,
+          path: path,
+          raw: key
+        });
       });
     });
 
@@ -68,8 +86,9 @@ const redux = Ember.Service.extend({
       keys = [ keys ];
     }
 
+    this.registry.pushObject({id, context, keys});
+    // initialize state on container
     keys.map(key => {
-      this.registry.pushObject({id, context, keys});
       this._setState(id, key);
     });
     this.notifyPropertyChange('__registryChange__');
@@ -93,11 +112,11 @@ const redux = Ember.Service.extend({
    * to those properties they've expressed interest in
    */
   _notify(pre, post) {
-    const stateInterest = this.get('_stateInterests');
-    Object.keys(stateInterest).map(key => {
-      if(get(pre, key) !== get(post, key)) {
-        stateInterest[key].map(container => {
-          this._setState(container._reduxRegistration, key);
+    const stateInterests = this.get('_stateInterests');
+    Object.keys(stateInterests).map(id => {
+      if(get(pre, id) !== get(post, id)) {
+        stateInterests[id].map(interest => {
+          this._setState(interest.container._reduxRegistration, interest.raw);
         });
       }
     });
@@ -110,18 +129,15 @@ const redux = Ember.Service.extend({
    * has changed. If the container is a Route then it will
    * instead set the state of it's coorsponding controller.
    */
-  _setState(id, key) {
-    const container = this.registry.filter(r => r.id === id)[0];
-    const prop = key.indexOf(/\w+as\w+/) === -1 ? key.split('.').pop() : key.replace(/.*as\w+/, '');
-    const value = key.indexOf(/\w+as\w+/) === -1 ? get(this.getState(), key) : key.replace(/.*as\w+/, '');
+  _setState(containerId, key) {
+    const { path, alias } = decomposeKey(key);
+    const state = this.getState();
+    const value = get(state, path);
+    const container = this.registry.filter(r => r.id === containerId)[0];
     const routeName = get(container, 'context.routeName');
     const target = container.context._isRoute ? container.context.controllerFor(routeName) : container.context;
 
-    if(!a(clone(get(container.context, 'stateInterest'))).includes(key)) {
-      debug(`Warning: setting state section "${key}" which is not registered in "${id}" as a stateInterest`);
-    }
-
-    set(target, prop, value);
+    set(target, alias, value);
   }
 
 });
