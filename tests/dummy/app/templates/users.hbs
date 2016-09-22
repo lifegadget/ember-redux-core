@@ -1,1 +1,37 @@
-{{outlet}}
+{{#markdown-convert style='github'}}
+# Users Demo
+> Managing an array of user state
+
+## Demo
+{{/markdown-convert}}
+
+<div class="demo">
+  {{user-table}}
+  {{new-user}}
+</div>
+<br>
+
+{{#markdown-convert style='github'}}
+## Context
+
+In this demo we are demonstrating the management of a array of user objects. The
+Redux actions involved are:
+
+- `USER_ADD` - adds one to the current value
+- `USER_UPDATE` - adds one to the current value
+- `USER_REMOVE` - subtracts one from the current state value
+
+Similarly to the _Count_ demo we will also save off state to localStorage so that you can reload without any concern about losing your precious demo date. :)
+
+Another interesting variation from the prior example is that rather than having the data management be configured on the Route we will do all our work within components:
+
+- [`app/components/user-table.js`]() and [`app/templates/components/user-table.hbs`]()
+  - will subscribe to changes on the `state.users` state tree, reporting back the results in a tabular structure
+  - actions at a "row level" will include _delete_ and _edit_
+  - in this case we choose to use **ember-cli** to generate the component with `ember generate redux-component user-table`
+      - You may notice the source extends `ember-redux-core/component/redux-component` rather than including the mixin like we did in the last example
+      - Both methods are perfectly fine and functionally eqivalent
+- [`app/redux/reducers/users.js`]()
+  - all actions mentioned above are handled
+
+{{/markdown-convert}}

@@ -1,0 +1,1 @@
+export { default } from 'ember-redux-core/components/redux-component';

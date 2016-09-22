@@ -20,3 +20,4 @@ testem.log
 jsconfig.json
 .vscodeignore
 /typings/*
+**/.DS_Store
