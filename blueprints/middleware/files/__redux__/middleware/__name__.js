@@ -1,5 +1,5 @@
 /**
- * MIDDLEWARE MODULE
+ * <%= dasherizedModuleName %> Middleware
  */
 
 const middleware = (store) => (next) => (action) => {

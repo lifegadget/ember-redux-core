@@ -88,7 +88,7 @@ const redux = Ember.Service.extend({
    */
   connect(id, context, keys) {
     if (Ember.typeOf(keys) !== 'array' ) {
-      keys = [ keys ];
+      keys = keys ? [ keys ] :  [];
     }
 
     this.registry.pushObject({id, context, keys});

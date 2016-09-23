@@ -1,3 +1,5 @@
+import Ember from 'ember';
+import { v4 } from 'ember-uuid';
 /**
  * This reducer takes in the localised state which
  * is owned by this reducer; it's job is create a
@@ -11,24 +13,35 @@
  * a default value for state and handle all unknown
  * actions by returning the state back unchanged.
  */
-const defaultState = {};
+
+const updateArray = function(initialArray, newRecord) {
+  return initialArray
+    .clone(0)
+    .map(r => r.id === newRecord.id
+      ? Ember.assign({}, r, newRecord)
+      : r
+  );
+};
+
+const defaultState = [];
 const reducer = (state, action) => {
+  const now = Date.now();
 
   switch(action.type) {
 
-    case 'FOO':
-      return Ember.assign({}, state, {
-        uno: 1,
-        dos: 2,
-        tres: 3
-      });
+    case 'USER_ADD':
+      const user = Ember.assign(
+        action.user,
+        { id: v4(), lastUpdated: now, createdAt: now }
+      );
+      return [ ...state, user ];
 
-    case 'BAR':
-      return Ember.assign({}, state, {
-        uno: 0,
-        dos: 0,
-        tres: 0
-      });
+    case 'USER_UPDATE':
+      const update = Ember.assign(
+        action.user,
+        { lastUpdated: now }
+      );
+      return [ updateArray(state, update) ];
 
     default:
       return state || defaultState;

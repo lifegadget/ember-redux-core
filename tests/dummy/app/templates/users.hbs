@@ -23,7 +23,12 @@ Redux actions involved are:
 
 Similarly to the _Count_ demo we will also save off state to localStorage so that you can reload without any concern about losing your precious demo date. :)
 
-Another interesting variation from the prior example is that rather than having the data management be configured on the Route we will do all our work within components:
+There are a few variations from the prior example worth calling out:
+
+- rather than having the data management be configured on the Route we will do all our work within components.
+- we have also abstracted all actions into a separate _action creator_ object called `user` (see below). This abstraction makes sense when you expect that the dispatched actions have reuse potential across components.
+
+For those wanting to look at code while playing with the demo:
 
 - [`app/components/user-table.js`]() and [`app/templates/components/user-table.hbs`]()
   - will subscribe to changes on the `state.users` state tree, reporting back the results in a tabular structure

@@ -1,6 +1,6 @@
 import Ember from 'ember';
 import layout from '../templates/components/redux-component';
-import ReduxMixin from '/app/mixins/redux';
+import ReduxMixin from '../mixins/redux';
 
 const reduxComponent = Ember.Component.extend(ReduxMixin, {
   layout

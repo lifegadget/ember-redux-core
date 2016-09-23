@@ -16,6 +16,7 @@ Router.map(function() {
   this.route('static-initializers');
   this.route('connect');
   this.route('install-and-config');
+  this.route('actions');
 });
 
 export default Router;

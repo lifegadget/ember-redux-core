@@ -1,5 +1,7 @@
 import Ember from 'ember';
 /**
+ * <%= dasherizedModuleName %> Reducer
+ *
  * This reducer takes in the localised state which
  * is owned by this reducer; it's job is create a
  * new (non-mutated) state object for this branch of

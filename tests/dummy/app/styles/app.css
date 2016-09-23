@@ -150,3 +150,16 @@ h1 {
   display: flex;
   margin-top: 1rem;
 }
+
+table td {
+  text-align: center;
+}
+
+.dim {
+  color: darkgrey;
+}
+
+.vertical-pad {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
