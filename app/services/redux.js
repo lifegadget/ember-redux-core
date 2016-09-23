@@ -1,6 +1,7 @@
 import Ember from 'ember';
 import reduxStore from '../redux/storeConfig';
 import initialState from '../redux/state-initializers/index';
+import watch from '../utils/watch';
 
 const { get, set, A, computed, typeOf } = Ember;
 const a = A;
@@ -34,7 +35,7 @@ const redux = Ember.Service.extend({
   /**
    * A registry organised by container registration
    */
-  registry: a([]),
+  registry: [],
   reduxSubscribers: [],
   /**
    * Returns the registry organised in an inverted fashion
@@ -64,6 +65,12 @@ const redux = Ember.Service.extend({
   init() {
     this._super(...arguments);
     this.store = reduxStore();
+    // native redux subscription to all change
+    const watcher = watch(this.store.getState, '.');
+    this.store.subscribe(watcher( (pre, post, changePath) => {
+      this.reduxSubscribers.map(fn => fn(pre, post));
+    }));
+    // add Ember subscribers to queue to receive relevant changes
     this.subscribe(this._notifyContainers.bind(this));
     this.subscribe(this._notifyInitializers.bind(this));
   },
@@ -71,10 +78,7 @@ const redux = Ember.Service.extend({
     return this.store.getState();
   },
   dispatch(action) {
-    const pre = this.store.getState();
     this.store.dispatch(action);
-    const post = this.store.getState();
-    this.reduxSubscribers.map(fn => fn(pre, post));
   },
   subscribe(func) {
     this.reduxSubscribers.push(func);
@@ -91,7 +95,7 @@ const redux = Ember.Service.extend({
       keys = keys ? [ keys ] :  [];
     }
 
-    this.registry.pushObject({id, context, keys});
+    this.registry.push({id, context, keys});
     // initialize state on container
     keys.map(key => {
       this._setState(id, key);
