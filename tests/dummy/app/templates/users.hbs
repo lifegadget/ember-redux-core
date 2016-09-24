@@ -5,7 +5,7 @@
 ## Demo
 {{/markdown-convert}}
 
-<div class="demo">
+<div class="demo users">
   {{user-table}}
   {{new-user}}
 </div>
@@ -21,9 +21,18 @@ Redux actions involved are:
 - `USER_UPDATE` - adds one to the current value
 - `USER_REMOVE` - subtracts one from the current state value
 
-Similarly to the _Count_ demo we will also save off state to localStorage so that you can reload without any concern about losing your precious demo date. :)
+Also considered but eventually eliminated were:
 
-There are a few variations from the prior example worth calling out:
+- `USER_IS_ADDING` - toggles whether a new user is in the process of being added
+- `USER_NEW` - a prospective user who's attributes are declared but not yet saved/cancelled
+
+Similarly to the _Count_ demo we will also save off the "users" state to localStorage so that you can reload without any concern about losing this precious demo date (sarcasm intended). But what about the much more "transient" state associated with the _yet to be created_ but _partially described_ user. This state in Ember would typically be just local properties of the `new-user` component and in fact that's what we've decided for now to do. Yet ... it is state and to have full time travel capability, it may be useful to have representations of local state in the Redux store. This idea has been discussed at length in the React/Redux community here:
+
+> [ephemeral state - issue 159](https://github.com/reactjs/redux/issues/159)
+
+So to be clear, the point of view in `ember-redux-core` will be to _not_ interfere with the local state of a component but there is nothing wrong a composable addon(s) being developed to automatically mount and unmount local state onto the global state. This will provide users with flexibility of choice in an area that is still in discussion while defaulting to the pattern that Ember developers will be most familiar with.
+
+Beyond the discussion of transient/ephemeral state, there are a few variations from the prior example worth calling out:
 
 - rather than having the data management be configured on the Route we will do all our work within components.
 - we have also abstracted all actions into a separate _action creator_ object called `user` (see below). This abstraction makes sense when you expect that the dispatched actions have reuse potential across components.

@@ -1,2 +1,9 @@
 {{! new-user template }}
-{{yield}}
+
+<div class="new-user">
+  {{#if isAdding}}
+    adding
+  {{else}}
+    {{ui-button 'Add User' onClick=(action 'actionCreators.users.addUser' newUser)}}
+  {{/if}}
+</div>

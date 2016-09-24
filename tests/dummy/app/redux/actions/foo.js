@@ -1,5 +1,5 @@
 /**
- * ACTIONS CREATOR for foobar1
+ * ACTIONS CREATOR for foo
  */
 
 export const action1 = (a) => {

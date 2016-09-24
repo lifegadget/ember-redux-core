@@ -3,8 +3,7 @@ import reduxStore from '../redux/storeConfig';
 import initialState from '../redux/state-initializers/index';
 import watch from '../utils/watch';
 
-const { get, set, A, computed, typeOf } = Ember;
-const a = A;
+const { get, set, computed, typeOf } = Ember;
 
 const clone = (thingy) => {
   switch(typeOf(thingy)) {
@@ -96,10 +95,10 @@ const redux = Ember.Service.extend({
     }
 
     this.registry.push({id, context, keys});
-    // initialize state on container
     keys.map(key => {
       this._setState(id, key);
     });
+
     this.notifyPropertyChange('__registryChange__');
   },
 
@@ -121,7 +120,6 @@ const redux = Ember.Service.extend({
    * expressed interest through their stateInterest property
    */
   _notifyContainers(pre, post) {
-    // containers
     const stateInterests = this.get('_stateInterests');
     Object.keys(stateInterests).map(id => {
       if(get(pre, id) !== get(post, id)) {

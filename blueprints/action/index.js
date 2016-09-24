@@ -30,6 +30,16 @@ function handler(action, options) {
   const moduleName = options.entity.name;
   const applicationName = options.project.pkg.name;
 
+  tools.manage(this, {
+    type: 'actions',
+    wrapperFunction: null,
+    isArray: false, // either array or hash structure
+    propertyPassedToValue: false,
+    externalDeps: (count) => '',
+    action, // aka, 'add' or 'remove'
+    options,
+  });
+
   switch(action) {
     case 'add':
       console.log(chalk.bold('\nAction supporter created') + ', to import into a container add:');

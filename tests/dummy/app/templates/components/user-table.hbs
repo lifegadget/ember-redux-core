@@ -1,22 +1,29 @@
 {{! user-table template }}
 {{yield}}
 
-<table style='width:100%'>
-  <tr>
-    <th>Name</th>
-    <th>Email</th>
-    <th>Phone</th>
-  </tr>
-  {{#each users as |user|}}
-    <tr>
-      <td>{{user.name}}</td>
-      <td>{{user.email}}</td>
-      <td>{{user.phone}}</td>
-    </tr>
+<div class="user-table" style='width:100%'>
 
-  {{else}}
+  <table style='width:100%'>
     <tr>
-      <td colspan="3" class="dim vertical-pad">There are currently no users currently in the system</td>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Phone</th>
     </tr>
-  {{/each}}
-</table>
+    {{#each users as |user|}}
+      <tr>
+        <td>{{user.name}}</td>
+        <td>{{user.email}}</td>
+        <td>{{user.phone}}</td>
+      </tr>
+
+    {{else}}
+      <tr>
+        <td colspan="3" class="dim vertical-pad">
+          There are currently no users currently in the system
+        </td>
+      </tr>
+    {{/each}}
+  </table>
+
+</div>
+
