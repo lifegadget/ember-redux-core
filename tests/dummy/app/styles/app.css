@@ -167,3 +167,20 @@ table td {
   padding-top: 1rem;
   padding-bottom: 1rem;
 }
+
+input {
+  padding: 0.5rem;
+  border-radius: 5px;
+  border-style: groove;
+}
+
+.pointer {
+  cursor: pointer;
+  padding: 0.5rem;
+  color: darkgrey;
+  transition: 0.5s all;
+}
+
+.pointer:hover {
+  color: black;
+}

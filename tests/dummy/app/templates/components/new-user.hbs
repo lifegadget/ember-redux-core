@@ -2,8 +2,21 @@
 
 <div class="new-user">
   {{#if isAdding}}
-    adding
+    <table style='width: 100%'>
+      <tr>
+        <td>{{text-input value=newUser.name placeholder='name' onChange=(mut newUser.name)}}</td>
+        <td>{{text-input value=newUser.email placeholder='email'  onChange=(mut newUser.email)}}</td>
+        <td>{{text-input value=newUser.phone placeholder='phone' onChange=(mut newUser.phone)}}</td>
+        <td>
+          {{ui-button 'Add' onClick=(pipe-action
+            (action-creator 'users.add' user=newUser)
+            (action 'clearUser')
+            (action 'toggleAdding')
+          )}}
+        </td>
+      </tr>
+    </table>
   {{else}}
-    {{ui-button 'Add User' onClick=(action 'actionCreators.users.addUser' newUser)}}
+    {{ui-button '+' onClick=(action 'toggleAdding')}}
   {{/if}}
 </div>

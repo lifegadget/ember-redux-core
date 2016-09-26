@@ -38,6 +38,7 @@
     "ember-cli-sri": "^2.1.0",
     "ember-cli-test-loader": "^1.1.0",
     "ember-cli-uglify": "^1.2.0",
+    "ember-composable-helpers": "1.1.2",
     "ember-disable-prototype-extensions": "^1.1.0",
     "ember-disable-proxy-controllers": "^1.0.1",
     "ember-export-application-global": "^1.0.5",
@@ -49,6 +50,7 @@
     "redux": "^3.6.0",
     "redux-thunk": "^2.1.0",
     "ui-button": "2.0.0",
+    "ui-input": "0.10.2",
     "ui-markdown": "0.1.10"
   },
   "keywords": [

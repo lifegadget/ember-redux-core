@@ -11,5 +11,17 @@ export default ReduxComponent.extend({
     phone: null
   },
   isAdding: false,
+  actions: {
+    toggleAdding() {
+      this.toggleProperty('isAdding');
+    },
+    clearUser() {
+      this.set('newUser', {
+        name: null,
+        email: null,
+        phone: null
+      });
+    }
+  }
 
 });

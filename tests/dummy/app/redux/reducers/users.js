@@ -43,6 +43,9 @@ const reducer = (state, action) => {
       );
       return [ updateArray(state, update) ];
 
+    case 'USER_REMOVE':
+      return state.filter(s => s.id !== action.id);
+
     default:
       return state || defaultState;
   } // end switch

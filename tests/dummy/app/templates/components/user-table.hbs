@@ -11,9 +11,24 @@
     </tr>
     {{#each users as |user|}}
       <tr>
-        <td>{{user.name}}</td>
+        <td>
+          {{#if isUpdating}}
+            {{text-input
+              value='updated.name'
+              defaultValue=user.name
+              placeholder='name'
+              onChange=(mut updatedUser.name)
+            }}
+          {{else}}
+            {{user.name}}
+          {{/if}}
+
+        </td>
         <td>{{user.email}}</td>
         <td>{{user.phone}}</td>
+        <td>
+          <span class="remove pointer" onclick={{action-creator 'users.remove' user.id}}>⌫</span>
+        </td>
       </tr>
 
     {{else}}

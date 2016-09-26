@@ -16,7 +16,12 @@ const { combineReducers } = redux;
  * reducer file.
  */
 
+import count from './count';
+import auth from './auth';
+import users from './users';
 
-export default {
-
-};
+export default combineReducers({
+  count,
+  auth,
+  users
+});

@@ -1,6 +1,7 @@
 import Ember from 'ember';
 import reduxStore from '../redux/storeConfig';
 import initialState from '../redux/state-initializers/index';
+import actionCreators from '../redux/actions/index';
 import watch from '../utils/watch';
 
 const { get, set, computed, typeOf } = Ember;
@@ -72,6 +73,8 @@ const redux = Ember.Service.extend({
     // add Ember subscribers to queue to receive relevant changes
     this.subscribe(this._notifyContainers.bind(this));
     this.subscribe(this._notifyInitializers.bind(this));
+    // store actionCreators in service
+    this._actionCreators = actionCreators;
   },
   getState() {
     return this.store.getState();
@@ -87,7 +90,8 @@ const redux = Ember.Service.extend({
    * connect
    *
    * Allows containers that need to be kept up-to-date with state
-   * to notify the service their "observation points"
+   * to notify the service their "observation points"; it also ensures
+   * that all "action
    */
   connect(id, context, keys) {
     if (Ember.typeOf(keys) !== 'array' ) {
@@ -156,11 +160,23 @@ const redux = Ember.Service.extend({
     const state = this.getState();
     const value = get(state, path);
     const container = this.registry.filter(r => r.id === containerId)[0];
-    const routeName = get(container, 'context.routeName');
-    const target = container.context._isRoute ? container.context.controllerFor(routeName) : container.context;
+    const target = this._getTargetComponent(container.context);
 
     set(target, alias, value);
+  },
+
+  /**
+   * _getTargetComponent
+   *
+   * based on the type of container (e.g., routes need redirection to controller)
+   * it will return a target which should recieve state and action creators
+   */
+  _getTargetComponent(context) {
+    const routeName = get(context, 'context.routeName');
+    return context._isRoute ? get(context, routeName) : context;
   }
+
+
 
 });
 

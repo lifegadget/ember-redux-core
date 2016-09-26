@@ -1,6 +1,5 @@
 import Ember from 'ember';
 import { v4 } from 'ember-uuid';
-import actionCreators from '../mixins/actions/index';
 const { get } = Ember;
 
 const redux = Ember.Mixin.create({
@@ -9,6 +8,9 @@ const redux = Ember.Mixin.create({
   state: null,
   stateInterest: null,
   registry: [],
+  actions: {
+    actionCreators: {}
+  },
 
   init() {
     this._super(...arguments);
@@ -36,16 +38,11 @@ const redux = Ember.Mixin.create({
     this._disconnect();
   },
 
-  _connect() {
-    this._connectStateChangesToContainer();
-    this._connectActionCreatorsToContainer();
-  },
-
   /**
    * Responsible for connecting the container to the redux service
    * so they may be updated with state (initial and updated)
    */
-  _connectStateChangesToContainer() {
+  _connect() {
     if(this._reduxRegistration) {
       return;
     }
@@ -53,10 +50,6 @@ const redux = Ember.Mixin.create({
     const keys = get(this, 'stateInterest');
     this.get('redux').connect(id, this, keys);
     this._reduxRegistration = id;
-  },
-
-  _connectActionCreatorsToContainer() {
-    this.set('actions', Ember.assign(get(this, 'actions'), { actionCreators }) );
   },
 
   _disconnect() {

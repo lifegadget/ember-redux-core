@@ -12,5 +12,5 @@ export const update = (id, props) => {
 };
 
 export const remove = (id) => {
-  return Ember.assign({}, { type: 'USER_DELETE', id });
+  return Ember.assign({}, { type: 'USER_REMOVE', id });
 };
