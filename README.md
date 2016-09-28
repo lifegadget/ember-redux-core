@@ -1,116 +1,42 @@
-# Ember Redux
+# Ember Redux Core
+> Bringing the REDUX state machine to Ember
 
-[![Travis][build-badge]][build] [![Code Climate][climate-badge]][climate] [![Score][score-badge]][score] [![npm package][npm-badge]][npm]
 
-## Description
+# Overview
 
-[ember-cli][] addon that provides simple [redux][] bindings for [ember.js][]
+This Ember addon is meant to make the transition to Redux easy and straight forward in a manner which _exposes_ everything to the consumer of the addon rather than performaing fancy magic behind curtains. Now I know we all love magic but really magic isn't needed for Redux ... it is powerful AND it is actually quite simple too. Furthermore, the popularity and it's founder (Dan Abranov) have contributed a ton of very good literature and video tutorials to help you grasp the power and use of this state system.
 
-## Installation
+### Standing on the shoulders of giants
 
-```
-ember install ember-redux
-```
+Before going any further I think it is worth stopping to say that this addon is another classic example of "standing on the shoulders of giants". Dan Abranov is a well spoken creator and advocate of Redux but he'll never shy away from telling you that the Redux solution takes many of it's ideas from the Elm programming language. In turn I recently heard the Elm creator, Evan Czaplicki, say recently in a podcast that his ideas in turn were taken in part from classic functional programming theories. With this metaphor in hand let me start by saying that this addon was inspired by Toran Billup's [`ember-redux`](http://www.ember-redux.com/) addon. His addon was instrumental in my believing that the cost of using Redux in Ember was containable.
 
-## Documentation
+While I had initially hoped that my contribution to the Ember communitity would just be PR's to Toran's effort it turns out that we both plan on being heavy users of our own respective addons (which in my case means I'm stubborn) and some of our views were different enough that it made more sense to go in different directions at least for now. Hopefully this will not serve as a _distraction_ to Embereños so much as _optionality_.
 
-http://www.ember-redux.com/
+# Demo
 
-## Demo
+You can see a demonstration of the addon here:
 
-https://ember-twiddle.com/7ce3446b14f166f04064eba663c0a350
+> https://ember-redux.firebaseapp.com
 
-## Example Container Component
 
-```js
-import Ember from 'ember';
-import hbs from 'htmlbars-inline-precompile';
-import connect from 'ember-redux-core/components/connect';
-import ajax from 'example/utilities/ajax';
+# License
 
-var stateToComputed = (state) => {
-  return {
-    users: state.users.all
-  };
-};
+Copyright (c) 2016 LifeGadget Ltd
 
-var dispatchToActions = (dispatch) => {
-  return {
-    remove: (id) => ajax(`/api/users/${id}`, 'DELETE').then(() => dispatch({type: 'REMOVE_USER', id: id}))
-  };
-};
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
 
-var UserListComponent = Ember.Component.extend({
-  layout: hbs`
-    {{yield users (action "remove")}}
-  `
-});
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-export default connect(stateToComputed, dispatchToActions)(UserListComponent);
-```
-
-## Example Presentation Component
-
-```js
-import Ember from 'ember';
-import hbs from 'htmlbars-inline-precompile';
-
-var UserTableComponent = Ember.Component.extend({
-  layout: hbs`
-    {{#each users as |user|}}
-      <div>{{user.name}}</div>
-      <button onclick={{action remove user.id}}>remove</button>
-    {{/each}}
-  `
-});
-
-export default UserTableComponent;
-```
-
-## Example Composition
-```js
-{{#user-list as |users remove|}}
-  {{user-table users=users remove=remove}}
-{{/user-list}}
-```
-
-## How do I enable time travel debugging?
-
-    1) install the redux chrome dev tools plugin
-    2) add a folder named enhancers with one file named index.js
-    3) in that file add 3 lines of code
-
-```js
-//app/enhancers/index.js
-import redux from 'npm:redux';
-var devtools = window.devToolsExtension ? window.devToolsExtension() : f => f;
-export default redux.compose(devtools);
-```
-
-## Running Tests
-
-    npm install
-    bower install
-    ember test
-
-## License
-
-Copyright © 2016 Toran Billups http://toranbillups.com
-
-Licensed under the MIT License
-
-[build-badge]: https://travis-ci.org/toranb/ember-redux.svg?branch=master
-[build]: https://travis-ci.org/toranb/ember-redux
-
-[npm-badge]: https://img.shields.io/npm/v/ember-redux.svg?style=flat-square
-[npm]: https://www.npmjs.org/package/ember-redux
-
-[climate-badge]: https://codeclimate.com/github/toranb/ember-redux-core/badges/gpa.svg
-[climate]: https://codeclimate.com/github/toranb/ember-redux
-
-[score-badge]: http://emberobserver.com/badges/ember-redux.svg
-[score]: http://emberobserver.com/addons/ember-redux
-
-[ember-cli]: http://www.ember-cli.com/
-[ember.js]: http://emberjs.com/
-[redux]: https://github.com/rackt/redux/
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
