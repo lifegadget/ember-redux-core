@@ -8,9 +8,6 @@ const redux = Ember.Mixin.create({
   state: null,
   stateInterest: null,
   registry: [],
-  actions: {
-    actionCreators: {}
-  },
 
   init() {
     this._super(...arguments);
@@ -24,9 +21,10 @@ const redux = Ember.Mixin.create({
    * If the container is a route we must wait until the beforeModel
    * hook is called before the `routeName` property will have been resolved.
    */
-  beforeModel() {
+  setupController(controller) {
     this._super(...arguments);
-    Ember.run.later(this._connect.bind(this), 0);
+    this._controllerFor = controller;
+    this._connect();
   },
 
   willDestroyElement() {
@@ -42,13 +40,13 @@ const redux = Ember.Mixin.create({
    * Responsible for connecting the container to the redux service
    * so they may be updated with state (initial and updated)
    */
-  _connect() {
+  _connect(routesController) {
     if(this._reduxRegistration) {
       return;
     }
     const id = v4();
     const keys = get(this, 'stateInterest');
-    this.get('redux').connect(id, this, keys);
+    this.get('redux').connect(id, this, keys, routesController);
     this._reduxRegistration = id;
   },
 
@@ -56,10 +54,6 @@ const redux = Ember.Mixin.create({
     this.get('redux').disconnect(this._reduxRegistration);
     this._reduxRegistration = null;
   },
-
-  _getController() {
-    return this.controllerFor(get(this, 'routeName'));
-  }
 
 });
 

@@ -184,3 +184,29 @@ input {
 .pointer:hover {
   color: black;
 }
+
+.placeholder {
+  color: lightgrey;
+  font-style: italic;
+}
+
+.user-table td,
+.user-table th {
+  width: 26%;
+  display: inline-flex;
+}
+
+.user-table td.wide {
+  width: 100%;
+  text-align: center;
+  display: block;
+}
+
+.user-table td.actions,
+.user-table th.actions {
+  width: initial;
+}
+
+.click-to-edit {
+  cursor: context-menu;
+}

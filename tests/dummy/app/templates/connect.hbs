@@ -2,18 +2,81 @@
 # Connection
 > Connecting Routes, Components, and Controllers to State and Dispatch
 
-## Different strokes for different folks
+Your Components, Routes, and Controllers are in the need of state (initial and updates) and access to `dispatch` functionality to create state changes. If you've used Redux in React you're probably used to using the `connect()` function. Because Ember is a little more opinionated framework we'll try to do this in an easier manner in **ember-redux-core**.
 
-Your Components, Routes, and Controllers are in the need of state (initial and updates) and access to `dispatch` functionality to create state change. This section will describe how to achieve this with **ember-redux-core**.
 
-If you were developing in React you'd probably use the `connect()` function off of the **react-redux** api surface. If you have come from **ember-redux** you'll know that that repo has been very faithful to the React design but with ember-redux-core we have made a few Ember-enabled departures. The variation was done with the intent of doing things in a way which ember developers will be more familiar/comfortable with. There is no "right way" here as Redux has no strict say on how you bridge between it's stage management and the JS framework you're using.
+### Getting Global State into Local Scope
 
-> Hopefully you'll find this intuitive but if you see better ways of achieving this feel free to drop an issue or (ideally) a PR with your thoughts sketched out.
+The two requirements to getting state (or parts of state) into a read-only view in your local scope is:
 
-## The Dao of `ember-redux-core` connection
+1. use the `redux` mixin
+1. set the `stateInterest` property to indicate interest in parts of the state tree
 
-The diagram below shows at a high-level the interaction that will take place between your containers (route, component, or controller) and the `redux` service provided by this addon.
+Here are a few examples of how you might state interest in state:
 
-![](images/connection.jpg)
+```js
+import redux from '../mixins/redux';
+const myComponent = Ember.Component.extend(redux, {
+
+  // Express interest in ALL state (by default will assign to "state" property locally)
+  stateInterest: ['.'],
+
+  // Express interest in the "count" and "users" trees
+  stateInterest: ['count', 'users'],
+
+  // Express interest in the "users" tree under the alias of "foobar"
+  stateInterest: ['users as foobar'],
+
+});
+```
+
+By stating your interest your local scope will not only be initialized with state but also be kept current as state changes. To make your life marginally easier you can use the cli to create redux-ready components with:
+
+```
+ember generate redux-component [name]
+```
+
+This will create a route which looks like:
+
+```
+// app/component/[name].js
+export default ReduxComponent.extend({
+  layout
+});
+```
+
+> a `ReduxComponent` is nothing more than a component which has included the _redux_ mixin.
+
+### Dispatching an Action
+
+#### The _do-it-yourself_ Approach
+
+In many cases the best way to fire off a new Action is to handle _dispatch_ directly in your component's action handler. Doing this is as easy as:
+
+```
+export default ReduxComponent.extend(redux, {
+  actions {
+    add() {
+      return this.get('redux').dispatch({
+        type: 'ADD_SOMETHING'
+      });
+    }
+  }
+}
+```
+
+This works, but as discussed in the **Actions** section, you may want to use Action Creators to generate your dispatch messages. In this case you _can_ just import the Action Creator in your components JS and use it in your own actions:
+
+```
+import users from '../redux/actions/users';
+```
+
+However, likely the most convenient method of leveraging is in your templates where you can use the `action-creator` helper:
+
+```hbs
+&lt;button onclick=\{{action-create 'users.remove' 123 }}&gt;press me&lt;/button>
+```
+
+This will automatically reference the `users.js` action creator and call the `remove()` function off of it. The resultant string is then sent to Redux's dispatch. When this helper is combined with an addon like `ember-composable-helpers` you can create some very clear redux templates without any boilerplate needed to use the action creator.
 
 {{/markdown-convert}}

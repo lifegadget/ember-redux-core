@@ -67,7 +67,7 @@ const redux = Ember.Service.extend({
     this.store = reduxStore();
     // native redux subscription to all change
     const watcher = watch(this.store.getState, '.');
-    this.store.subscribe(watcher( (pre, post, changePath) => {
+    this.store.subscribe(watcher( (post, pre, changePath) => {
       this.reduxSubscribers.map(fn => fn(pre, post));
     }));
     // add Ember subscribers to queue to receive relevant changes
@@ -172,11 +172,8 @@ const redux = Ember.Service.extend({
    * it will return a target which should recieve state and action creators
    */
   _getTargetComponent(context) {
-    const routeName = get(context, 'context.routeName');
-    return context._isRoute ? get(context, routeName) : context;
+    return context._isRoute ? context._controllerFor : context;
   }
-
-
 
 });
 

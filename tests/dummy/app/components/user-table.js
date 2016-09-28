@@ -10,6 +10,13 @@ export default ReduxComponent.extend({
     name: null,
     email: null,
     phone: null
+  },
+  updating: null,
+
+  actions: {
+    update(id) {
+      this.set('updating', id);
+    }
   }
 
 });

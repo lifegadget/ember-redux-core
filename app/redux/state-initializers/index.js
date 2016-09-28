@@ -1,5 +1,3 @@
-import config from 'ember-get-config';
-import Ember from 'ember';
 /**
  * For many Ember apps you may choose to ignore the state-initializer but
  * with a growing tendency for offline applications it is becoming increasingly

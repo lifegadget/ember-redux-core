@@ -3,37 +3,42 @@
 
 <div class="user-table" style='width:100%'>
 
-  <table style='width:100%'>
+  <table style='width:100%' class='user-table'>
     <tr>
       <th>Name</th>
       <th>Email</th>
       <th>Phone</th>
+      <th>&nbsp;</th>
     </tr>
     {{#each users as |user|}}
       <tr>
         <td>
-          {{#if isUpdating}}
-            {{text-input
-              value='updated.name'
-              defaultValue=user.name
-              placeholder='name'
-              onChange=(mut updatedUser.name)
-            }}
+          {{#if (eq updating user.id)}}
+            <span >
+              {{text-input
+                value=updatedUser.name
+                defaultValue=user.name
+                placeholder='name'
+                onChange=(mut updatedUser.name)
+              }}
+            </span>
           {{else}}
-            {{user.name}}
+            <span onclick={{action 'update' user.id}} class="click-to-edit">
+              {{placeholder user.name 'name'}}
+            </span>
           {{/if}}
 
         </td>
-        <td>{{user.email}}</td>
-        <td>{{user.phone}}</td>
-        <td>
+        <td>{{placeholder user.email 'email'}}</td>
+        <td>{{placeholder user.phone 'phone'}}</td>
+        <td class='actions'>
           <span class="remove pointer" onclick={{action-creator 'users.remove' user.id}}>⌫</span>
         </td>
       </tr>
 
     {{else}}
       <tr>
-        <td colspan="3" class="dim vertical-pad">
+        <td colspan="4" class="dim vertical-pad wide">
           There are currently no users currently in the system
         </td>
       </tr>
