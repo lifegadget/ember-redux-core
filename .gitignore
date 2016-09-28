@@ -19,4 +19,6 @@ testem.log
 # vs-code
 jsconfig.json
 .vscodeignore
+typings.json
 /typings/*
+**/.DS_Store
