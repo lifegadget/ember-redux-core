@@ -14,7 +14,7 @@ While I had initially hoped that my contribution to the Ember communitity would 
 
 # Demo
 
-You can see a demonstration of the addon here:
+You can see a demonstration of and documentation for the addon here:
 
 > https://ember-redux.firebaseapp.com
 

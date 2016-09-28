@@ -6,9 +6,7 @@ const Router = Ember.Router.extend({
 });
 
 Router.map(function() {
-  this.route('count');
-  this.route('users');
-  this.route('identity');
+  // docs
   this.route('reducers');
   this.route('the-store');
   this.route('middleware');
@@ -17,6 +15,12 @@ Router.map(function() {
   this.route('connect');
   this.route('install-and-config');
   this.route('actions');
+
+  // demos
+  this.route('count');
+  this.route('users');
+  this.route('identity');
+
 });
 
 export default Router;
