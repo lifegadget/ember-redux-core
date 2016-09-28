@@ -1,0 +1,24 @@
+{{#markdown-convert style='github'}}
+
+  # The Store and the Redux Service
+  All state in Redux is stored in a single immutable "store". When you first _use_ the `redux` service provided by this Addon it will be initiated for you along with all the middlewares and enhancers which you have configured (more on that later).
+
+  ### The Ember `redux` Service
+
+  The service -- which you can inject into any route, controller, or component -- will provide a very handy way to reach the core Redux API:
+
+  - `getState()` - gets the current state of Redux state-machine
+  - `dispatch()` - allows a mechanism to dispatch actions to your reducers for processing
+  - `subscribe()` - allows indication of interest to changes in the state tree
+
+  ## Structuring State
+  How your state is "structured" is very much a _bespoke_ consideration for any project.
+
+
+{{/markdown-convert}}
+
+<br>
+<div class="next-section">
+  <div>Next up ... </div>
+  <div>{{ui-button 'Docs > Reducers' onClick=(route-action 'navigate' 'reducers') }}</div>
+</div>

@@ -1,0 +1,53 @@
+{{#markdown-convert style='github'}}
+# Count Demo
+> Showing simple state change through a numeric sub-section of state
+
+## Demo
+{{/markdown-convert}}
+
+<div class="demo">
+  <div class="value">
+    {{count}}
+  </div>
+  <div class="action-buttons">
+    {{ui-button 'Add' onClick=(route-action 'add')}}
+    {{ui-button 'Subtract' onClick=(route-action 'subtract')}}
+    {{ui-button 'Reset' onClick=(route-action 'reset') mood='danger'}}
+  </div>
+</div>
+<br>
+
+{{#markdown-convert style='github'}}
+## Context
+
+Under the global state object, there is a state property called `state.count` which we will be manipulating in this demo through the following
+Redux actions:
+
+- `COUNT_ADD` - adds one to the current value
+- `COUNT_SUBTRACT` - subtracts one from the current state value
+- `COUNT_RESET` - resets the counter to a _zero_ value
+
+> **Note**: if you have the [Redux debugger](https://github.com/zalmoxisus/redux-devtools-extension#usage) you can use this with this demo to both fire actions as well as monitor actions and state change
+
+If you want to follow along with the code:
+
+- [`/dummy/app/templates/count.hbs`](https://github.com/lifegadget/ember-redux-core/blob/master/tests/dummy/app/templates/count.hbs)
+  - action buttons use the `route-action` helper to call actions on route
+
+- [`/dummy/app/route/count.js`](https://github.com/lifegadget/ember-redux-core/blob/master/tests/dummy/app/routes/count.js)
+  - the inclusion of the `redux` mixin connects the route to the state machine
+  - by defining the `stateInterest` property we indicate which properties to make available to the route's controller
+
+        > Note: the definition illustrates not only direct property mapping but also the ability to do "aliased" mappings with the "property as xxx" syntax. In this case it's not functionally needed but in many use-cases this will ensure you avoid any possible namespace collisions.
+
+  - the actions are able to directly dispatch using the `redux` service
+      - had the complexity been greater or there was high reuse cross-component for this action then it would be more appropriately handled with the `count.hbs` template calling into an action-helper rather than the routes actions.
+
+- [`/dummy/app/redux/reducers/count.js`](https://github.com/lifegadget/ember-redux-core/blob/master/tests/dummy/app/redux/reducers/count.js)
+  - this reducer is responsible all state under the "count" property of the global state tree; which in this case is it means it manages a single number
+  - all three aforementioned actions are handled here
+- [`/dummy/app/redux/state-initializer/count.js`](https://github.com/lifegadget/ember-redux-core/blob/master/tests/dummy/app/redux/state-initializers/count.js)
+  - no initializer was probably needed but since everyone likes a sexy demo, ...
+  - we've added an initializer which ensures that state is maintained with a browser reload. It does this by pushing state to localStorage.
+
+{{/markdown-convert}}

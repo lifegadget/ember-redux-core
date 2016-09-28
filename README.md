@@ -25,7 +25,7 @@ https://ember-twiddle.com/7ce3446b14f166f04064eba663c0a350
 ```js
 import Ember from 'ember';
 import hbs from 'htmlbars-inline-precompile';
-import connect from 'ember-redux/components/connect';
+import connect from 'ember-redux-core/components/connect';
 import ajax from 'example/utilities/ajax';
 
 var stateToComputed = (state) => {
@@ -105,7 +105,7 @@ Licensed under the MIT License
 [npm-badge]: https://img.shields.io/npm/v/ember-redux.svg?style=flat-square
 [npm]: https://www.npmjs.org/package/ember-redux
 
-[climate-badge]: https://codeclimate.com/github/toranb/ember-redux/badges/gpa.svg
+[climate-badge]: https://codeclimate.com/github/toranb/ember-redux-core/badges/gpa.svg
 [climate]: https://codeclimate.com/github/toranb/ember-redux
 
 [score-badge]: http://emberobserver.com/badges/ember-redux.svg

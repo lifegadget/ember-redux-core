@@ -1,11 +1,49 @@
-<h2 id="title">Welcome to Ember</h2>
+<div class="ember-redux-core">
 
-{{outlet}}
+  <div class="heading">
+    <div class="logo">
+      <img src="images/ember-redux.png" alt="logo" width='175px'>
+    </div>
+    <div class="text">
+      <h1 id="title">ember-redux-core</h1>
+      <div class="sub-heading">Bringing the REDUX state machine to Ember</div>
+    </div>
+  </div>
 
-{{#link-to 'counts' class='counts-link'}}counts{{/link-to}}
-{{#link-to 'dashboard' class='dashboard-link'}}dashboard{{/link-to}}
-{{#link-to 'empty' class='empty-link'}}empty{{/link-to}}
-{{#link-to 'users' class='users-link'}}users{{/link-to}}
-{{#link-to 'items' class='items-link'}}items{{/link-to}}
-{{#link-to 'fetch' class='fetch-link'}}fetch{{/link-to}}
-{{#link-to 'thunk' class='thunk-link'}}thunk{{/link-to}}
+
+  <div class="page">
+  <div class="left-side">
+    <h2>Docs</h2>
+    <ul>
+      <li>{{#link-to 'index' class='count-link'}}Overview{{/link-to}}</li>
+      <li>{{#link-to 'install-and-config' class='count-link'}}Installation{{/link-to}}</li>
+      <li>{{#link-to 'reducers' class='count-link'}}Reducers{{/link-to}}</li>
+      <li>{{#link-to 'actions' class='count-link'}}Actions{{/link-to}}</li>
+      <li>{{#link-to 'the-store' class='count-link'}}Redux Store & API{{/link-to}}</li>
+      <li>{{#link-to 'connect' class='count-link'}}Connection{{/link-to}}</li>
+      <li>{{#link-to 'middleware' class='count-link'}}Middleware{{/link-to}}</li>
+      <li>{{#link-to 'enhancers' class='count-link'}}Enhancers{{/link-to}}</li>
+    </ul>
+    <h2>Demos</h2>
+    <ul>
+      <li>{{#link-to 'count' class='count-link'}}Count<br/><small>(numeric state example)</small>{{/link-to}}</li>
+      <li>{{#link-to 'users' class='users-link'}}Users<br/><small>(array state example)</small>{{/link-to}}</li>
+      <li>{{#link-to 'count' class='-link'}}Identity<br/><small>(hash state example)</small>{{/link-to}}</li>
+    </ul>
+
+  <h2>Reference</h2>
+    <ul>
+      <li>{{#link-to 'index' class='count-link'}}Redux links{{/link-to}}</li>
+      <li>{{#link-to 'index' class='count-link'}}ember-cli commands{{/link-to}}</li>
+      <li>{{#link-to 'middleware' class='count-link'}}building extensions{{/link-to}}</li>
+    </ul>
+
+  </div>
+
+  <div class="right-side">
+    {{outlet}}
+  </div>
+
+  </div>
+
+</div>
