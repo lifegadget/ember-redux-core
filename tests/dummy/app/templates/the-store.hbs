@@ -1,9 +1,9 @@
 {{#markdown-convert style='github'}}
 
   # The Redux Store
-  A central tenet of Redux is that state -- all state -- is stored in a single immutable "store".
+  A central tenet of Redux is that state -- all state -- is stored in a single immutable "store". With `ember-redux-core` this store and the core Redux API that comes with it is provided to you as a Ember service called ... drum roll ... `redux`. If you guessed the name give yourself five points, you're really soaking this material up. :)
 
-  When you first _use_ the `redux` service provided by this Addon it will be initiated for you along with all the middlewares and enhancers which you have configured (more on that later).
+  So let's take a look at this service for a moment ...
 
   ### The Ember `redux` Service
 
@@ -13,13 +13,27 @@
   - `dispatch()` - allows a mechanism to dispatch actions to your reducers for processing
   - `subscribe()` - allows indication of interest to changes in the state tree
 
-  ## Structuring State
-  How your state is "structured" is very much a _bespoke_ consideration for any project.
+  If you're already familiar with Redux than this will all be very familiar. In fact, while you'll likely want to know about this API you'll find out in the 'connection' section that in most cases you'll not even need it.
+
+  > Before we leave the topic entirely, it is worth making one distinction about the `subscribe()` method. It's more of a _detail_ than a big shift but worth knowing anyway ... while the other methods on the API are strictly just proxied through to Redux, the "subscribe" method is managed slightly differently in that subscribers are put in a queue and when a change takes place they are not only given execution rights via their `callback` but the callback is also passed the state _before_ and _after_ the change to help them make a decision on course of action (the Redux API typically gives you nothing back).
+
+  ### Configuration of the Store
+
+  ![](/images/store-config.png)
+
+  The first thing that the aforementioned service will do is it will _create_ the store using Redux's `createStore()` call. This is done lazilily at the point that the service is initialized but at this point it's configuration will be determined by the contents of the `storeConfig.js` file. In most cases you'll not need to change this but it's still useful to know what this file is and if you ever want complete control of things you can dig into this to your hearts content. If you're just getting started with Redux though, have a look to feed your curiosity and then leave it alone. :)
+
+  ### Structuring State
+  How the state of _your_ application is "structured" is very much a bespoke consideration for any project but the key to managing that state is to break it into parts. This addon helps make that structuring very straight forward by assuming that you'll -- at a minimum -- structure actions, reducers, initializers separately for the highest level structures in your state tree. So, for instance, if you're root state look like this:
+
+
+
+  You'd in turn expect to have a **reducer** called `reducers/users.js` to manage actions associated with that part of the state tree. You'd likely also have some **action-creators** called `actions/users.js` to help you fire of the dispatch of changes to state.
+
 
 
 {{/markdown-convert}}
 
-<br>
 <div class="next-section">
   <div>Next up ... </div>
   <div>{{ui-button 'Docs > Reducers' onClick=(route-action 'navigate' 'reducers') }}</div>

@@ -7,14 +7,14 @@ const Router = Ember.Router.extend({
 
 Router.map(function() {
   // docs
-  this.route('reducers');
   this.route('the-store');
+  this.route('actions');
+  this.route('reducers');
+  this.route('static-initializers');
   this.route('middleware');
   this.route('enhancers');
-  this.route('static-initializers');
   this.route('connect');
   this.route('install-and-config');
-  this.route('actions');
 
   // demos
   this.route('count');
