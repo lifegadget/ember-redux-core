@@ -1,6 +1,3 @@
-import redux from 'npm:redux';
-const { combineReducers } = redux;
-
 /**
  * This is the master reducer, it partitions the jobs amounts
  * one or more other reducers which take on responsibility for
@@ -20,8 +17,8 @@ import count from './count';
 import auth from './auth';
 import users from './users';
 
-export default combineReducers({
+export default {
   count,
   auth,
   users
-});
+};

@@ -61,6 +61,10 @@ const redux = Ember.Service.extend({
 
     return interests;
   }),
+  /**
+   * Allows addons to extend the reducers used for state-management
+   */
+  addonReducers: {},
 
   init() {
     this._super(...arguments);

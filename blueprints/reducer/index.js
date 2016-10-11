@@ -29,14 +29,9 @@ module.exports = {
 function manage(action, options) {
   tools.manage(this, {
     type: 'reducers',
-    wrapperFunction: 'combineReducers',
     isArray: false, // either array or hash structure
     propertyPassedToValue: false,
-    externalDeps: (count) => {
-      return count > 0
-        ? `import redux from 'npm:redux';\nconst { combineReducers } = redux;\n`
-        : '';
-    },
+    externalDeps: '',
     action, // aka, 'add' or 'remove'
     options,
   });

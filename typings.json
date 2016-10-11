@@ -1,8 +1,7 @@
 {
-  "globalDevDependencies": {
-    "chalk": "registry:dt/chalk#0.4.0+20160317120654"
-  },
+  "globalDevDependencies": {},
   "globalDependencies": {
+    "chalk": "registry:dt/chalk#0.4.0+20160317120654",
     "showdown": "registry:dt/showdown#1.4.1+20160608102004"
   }
 }

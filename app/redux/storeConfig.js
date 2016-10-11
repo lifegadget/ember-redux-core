@@ -1,12 +1,15 @@
 import redux from 'npm:redux';
-import reducers from './reducers/index';
+import appReducers from './reducers/index';
 import enhancers from './enhancers/index';
 import middleware from './middleware/index';
 import initialState from './state-initializers/index';
+import config from 'ember-get-config';
 
-const { createStore, applyMiddleware, compose } = redux;
-const createStoreWithMiddleware = compose(applyMiddleware(...middleware), enhancers)(createStore);
+const { createStore, applyMiddleware, compose, combineReducers, addonReducers } = redux;
+const devTools = window.devToolsExtension ? window.devToolsExtension() : f => f;
+const createStoreWithMiddleware = compose(applyMiddleware(...middleware), devTools, enhancers)(createStore);
 
 export default function() {
-  return createStoreWithMiddleware(reducers, initialState);
+  const allReducers = combineReducers(appReducers, addonReducers);
+  return createStoreWithMiddleware(allReducers, initialState.loadState(config));
 }
