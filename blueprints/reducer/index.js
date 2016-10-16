@@ -29,11 +29,11 @@ module.exports = {
 function manage(action, options) {
   tools.manage(this, {
     type: 'reducers',
-    wrapperFunction: 'Immutable.OrderedMap',
+    wrapperFunction: false,
     isArray: false, // either array or hash structure
     propertyPassedToValue: false,
     externalDeps: () => {
-      return `import Immutable from 'immutable';\n`;
+      return ``;
     },
     action, // aka, 'add' or 'remove'
     options,

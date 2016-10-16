@@ -1,4 +1,3 @@
-import Immutable from 'immutable';
 /**
  * This is the master reducer, it partitions the jobs amounts
  * one or more other reducers which take on responsibility for
@@ -13,7 +12,7 @@ import Immutable from 'immutable';
  * Note: only VERY small applications should be managed by a single
  * reducer file.
  */
-const defaultState = Immutable.OrderedMap();
+const defaultState = {};
 
 const reducer = (state, action) => {
   return defaultState;

@@ -25,11 +25,17 @@ const modules = [];
 
 export function loadState(config) {
   const state = {};
-  modules.map(m => {
-    state[m] = this[m].loadState(config);
+
+  Object.keys(Reducers).map(m => {
+    if(modules[m]) {
+      state[m] = modules[m].loadState(config);
+    } else {
+      state[m] = Reducers[m](undefined, { type: 'INIT' }).toJS();
+    }
+
   });
 
-  return OrderedMap(state);
+  return new OrderedMap(state);
 }
 
 export function saveState(pre, post) {
