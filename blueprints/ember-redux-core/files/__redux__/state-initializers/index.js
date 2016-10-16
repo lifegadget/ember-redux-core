@@ -1,3 +1,7 @@
+import Ember from 'ember';
+import Immutable from 'immutable';
+const { OrderedMap } = Immutable;
+const { get } = Ember;
 /**
  * For many Ember apps you may choose to ignore the state-initializer but
  * with a growing tendency for offline applications it is becoming increasingly
@@ -25,12 +29,12 @@ export function loadState(config) {
     state[m] = this[m].loadState(config);
   });
 
-  return state;
+  return OrderedMap(state);
 }
 
 export function saveState(pre, post) {
   modules.map(m => {
-    if(get(pre, m) !== get(post, m)) {
+    if(pre.get(m) !== post.get(m)) {
       get(this, m).saveState(pre, post);
     }
   });

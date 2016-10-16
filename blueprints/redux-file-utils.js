@@ -43,7 +43,7 @@ const manage = function manage(context, config) {
   const direction = action === 'add' ? 'to' : 'from';
   const modules = getModules(findDirectory(type, options));
   const modulesListOutput = outputModuleList ? '\n' + buildModulesList(modules) : '';
-  const dependencies = externalDeps(modules.length);
+  const dependencies = externalDeps(modules.length) || '';
   const onlyOnce = fileContents.aboveFold.indexOf(dependencies) === -1 ? dependencies : '';
 
   context.ui.writeLine( `  ${chalk[color](verb)} "${chalk.bold(name)}" ${direction} master ${typeSingular} file [${chalk.grey(`${type}/index.js`)}]`);

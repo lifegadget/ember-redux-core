@@ -18,15 +18,7 @@
  * This will create a file '[name].js' who's job it is to export a function which when called
  * will produce a middleware function.
  *
- * It's good to note that in many cases you'll not need to be overly creative as there are
- * many pre-existing middleware's you can take off the shelf and use. In fact, by default
- * we've added two that are VERY common in Redux apps by default both because we think you'll
- * want to use them but also because they serve as a small example (of pulling off the self
- * more than rolling your own).
+ * Alternatively, install a pre-existing middleware with `ember install ember-redux-[name]`
  */
 
-import thunk from './thunk';
-
-export default [
-  thunk
-];
+export default [];
