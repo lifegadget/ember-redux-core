@@ -2,5 +2,9 @@
 'use strict';
 
 module.exports = {
-  name: 'ember-redux-core'
+  name: 'ember-redux-core',
+  normalizeEntityName: () => {},
+  afterInstall() {
+    return this.addAddonToProject('ui-immutable');
+  }
 };
