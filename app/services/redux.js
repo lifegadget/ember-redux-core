@@ -61,10 +61,20 @@ const redux = Ember.Service.extend({
 
     return interests;
   }),
+  _addonReducers: {},
   /**
    * Allows addons to extend the reducers used for state-management
    */
-  addonReducers: {},
+  addAddonReducer(name, fn) {
+    if(this._addonReducers[name]) {
+      Ember.debug(`Trying to add the reducer ${name} more than once`);
+    } else {
+      this._addonReducers[name] = fn;
+    }
+  },
+  getAddonReducers() {
+    return this._addonReducers;
+  },
 
   init() {
     this._super(...arguments);
