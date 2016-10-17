@@ -1,6 +1,5 @@
 import Ember from 'ember';
-import Immutable from 'immutable';
-const { OrderedMap } = Immutable;
+import Reducers from '../reducers/index';
 const { get } = Ember;
 /**
  * For many Ember apps you may choose to ignore the state-initializer but
@@ -30,12 +29,12 @@ export function loadState(config) {
     if(modules[m]) {
       state[m] = modules[m].loadState(config);
     } else {
-      state[m] = Reducers[m](undefined, { type: 'INIT' }).toJS();
+      state[m] = Reducers[m](undefined, { type: 'INIT' });
     }
 
   });
 
-  return new OrderedMap(state);
+  return state;
 }
 
 export function saveState(pre, post) {
