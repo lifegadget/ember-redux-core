@@ -43,7 +43,7 @@ function handler(action, options) {
   switch(action) {
     case 'add':
       console.log(chalk.bold('\nAction supporter created') + ', to import into a container add:');
-      console.log(chalk.grey('\n  import ') +
+      console.log(chalk.grey('\n  import * as ') +
         chalk.green(moduleName) +
         chalk.grey(' from ') +
         chalk.white(`'/${applicationName}/redux/actions/`) +

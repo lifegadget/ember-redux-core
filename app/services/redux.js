@@ -78,24 +78,47 @@ const redux = Ember.Service.extend({
 
   init() {
     this._super(...arguments);
-    this.store = reduxStore();
-    // native redux subscription to all change
-    const watcher = watch(this.store.getState, '.');
-    this.store.subscribe(watcher( (post, pre, changePath) => {
-      this.reduxSubscribers.map(fn => fn(pre, post));
-    }));
     // add Ember subscribers to queue to receive relevant changes
     this.subscribe(this._notifyContainers.bind(this));
     this.subscribe(this._notifyInitializers.bind(this));
     // store actionCreators in service
     this._actionCreators = actionCreators;
   },
+
+  /**
+   * Wraps the imported utility function to make for a cleaner internal API.
+   * This is a low-level API and external consumers should use the
+   * "subscribe" call.
+   */
+  _watch(scope) {
+    return watch(this.store.getState, scope);
+  },
+
+  // Called once addons have had a chance to add their reducers
+  start() {
+    this.store = reduxStore(this.getAddonReducers());
+    // native redux subscription to all change
+    const watcher = this._watch('.');
+    this.store.subscribe(watcher( (post, pre, changePath) => {
+      this.reduxSubscribers.map(fn => fn(pre, post, changePath));
+    }));
+  },
+
   getState() {
     return this.store.getState();
   },
+
   dispatch(action) {
     this.store.dispatch(action);
   },
+
+  /**
+   * subscribe
+   *
+   * allows interested parties to register for updates to the state
+   * tree. This is unlike the default Redux subscribe call in that
+   * subscribers are return two parameters: prior state, and new state.
+   */
   subscribe(func) {
     this.reduxSubscribers.push(func);
   },

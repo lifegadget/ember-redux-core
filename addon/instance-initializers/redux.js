@@ -1,7 +1,6 @@
 export function initialize(application) {
-  // application.inject('route', 'application', 'service:redux');
-  // const { container = application } = application;
-  application.lookup('service:redux');
+  const redux = application.lookup('service:redux');
+  redux.start();
 }
 
 export default {
