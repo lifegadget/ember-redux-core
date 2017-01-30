@@ -25,8 +25,4 @@
  * more than rolling your own).
  */
 
-import thunk from './thunk';
-
-export default [
-  thunk
-];
+export default [];

@@ -1,1 +1,3 @@
-/Volumes/PEGASUS/repos/mine/ember-redux/tests/dummy/app/redux/enhancers/devtools.js
+import redux from 'npm:redux';
+var devtools = window.devToolsExtension ? window.devToolsExtension() : f => f;
+export default redux.compose(devtools);

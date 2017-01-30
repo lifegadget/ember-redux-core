@@ -16,6 +16,6 @@ export default function watch(getState, objectPath, compare) {
         currentValue = newValue;
         fn(newValue, oldValue, objectPath);
       }
-    }
-  }
+    };
+  };
 }
