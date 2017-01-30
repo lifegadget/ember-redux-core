@@ -2,7 +2,7 @@ const path        = require('path');
 const tools       = require('../redux-file-utils');
 
 module.exports = {
-  description: 'Installation blueprint for ember-redux',
+  description: 'Installation blueprint for ember-redux-core',
   normalizeEntityName: function() {},
 
   afterInstall: function() {
@@ -12,7 +12,8 @@ module.exports = {
       ]
     }).then(function() {
       return this.addPackagesToProject([
-        {name: 'redux', target: '^3.5.2'}
+        {name: 'redux', target: '^3.6.0'},
+        {name: 'immutable', target: '^3.8.1'}
       ]);
     }.bind(this));
   },
