@@ -7,7 +7,7 @@ function defaultCompare (a, b) {
 
 export default function watch(getState, objectPath, compare) {
   compare = compare || defaultCompare;
-  let currentValue = get(getState(), objectPath);
+  let currentValue = objectPath === '.' ? getState() : get(getState(), objectPath);
   return function w (fn) {
     return function () {
       const newValue = get(getState(), objectPath);
