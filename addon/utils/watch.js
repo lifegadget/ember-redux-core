@@ -10,7 +10,7 @@ export default function watch(getState, objectPath, compare) {
   let currentValue = objectPath === '.' ? getState() : get(getState(), objectPath);
   return function w (fn) {
     return function () {
-      const newValue = get(getState(), objectPath);
+      const newValue = objectPath === '.' ? getState() : get(getState(), objectPath);
       if (!compare(currentValue, newValue)) {
         const oldValue = currentValue;
         currentValue = newValue;

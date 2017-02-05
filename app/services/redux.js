@@ -5,6 +5,7 @@ import actionCreators from '../redux/actions/index';
 import watch from '../utils/watch';
 
 const { get, set, computed, typeOf } = Ember;
+let store = {};
 
 const clone = (thingy) => {
   switch(typeOf(thingy)) {
@@ -64,10 +65,10 @@ const redux = Ember.Service.extend({
 
   init() {
     this._super(...arguments);
-    this.store = reduxStore();
+    store = reduxStore();
     // native redux subscription to all change
-    const watcher = watch(this.store.getState, '.');
-    this.store.subscribe(watcher( (post, pre, changePath) => {
+    const watcher = watch(store.getState, '.');
+    store.subscribe(watcher( (post, pre, changePath) => {
       this.reduxSubscribers.map(fn => fn(pre, post));
     }));
     // add Ember subscribers to queue to receive relevant changes
@@ -77,10 +78,10 @@ const redux = Ember.Service.extend({
     this._actionCreators = actionCreators;
   },
   getState() {
-    return this.store.getState();
+    return store.getState();
   },
   dispatch(action) {
-    this.store.dispatch(action);
+    store.dispatch(action);
   },
   subscribe(func) {
     this.reduxSubscribers.push(func);
