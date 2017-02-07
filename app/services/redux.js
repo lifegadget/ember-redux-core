@@ -22,7 +22,7 @@ const clone = (thingy) => {
 };
 
 const decomposeKey = function(key) {
-  const parts = key.split('.');
+  const parts = key.split('[./]');
   const prop = clone(parts).pop();
   const hasAlias = clone(parts).pop().indexOf(' as ') !== -1;
   return {

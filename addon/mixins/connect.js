@@ -1,18 +1,15 @@
 import Ember from 'ember';
 import { v4 } from 'ember-uuid';
-const { get } = Ember;
+const { get, observer } = Ember;
 
-let connectedProperties = {};
-
-
-const redux = Ember.Mixin.create({
+const connect = Ember.Mixin.create({
   redux: Ember.inject.service(),
   state: null, // all connected state will reside off of this offset to avoid name collisions
   connect: null, // container should redefine to state their interests within state tree
 
   init() {
     this._super(...arguments);
-    this._isRoute = get(this, 'store') ? true : false;
+    this._isRoute = get(this, 'store') ? true : false; // TODO: find a better way to test this
     if(!this._isRoute) {
       this._connect();
     }
@@ -37,6 +34,14 @@ const redux = Ember.Mixin.create({
     this._disconnect();
   },
 
+  // connectObserver: observer('connect', function() {
+  //   const connect = this.get('connect');
+  //   if (connect) {
+  //     console.log(`connecting: ${connect.join(',')}`);
+  //     this._connect();
+  //   }
+  // }),
+
   /**
    * Responsible for connecting the container to the redux service
    * so they may be updated with state (initial and updated)
@@ -59,5 +64,5 @@ const redux = Ember.Mixin.create({
 });
 
 
-redux[Ember.NAME_KEY] = 'redux-mixin';
-export default redux;
+connect[Ember.NAME_KEY] = 'connect-mixin';
+export default connect;

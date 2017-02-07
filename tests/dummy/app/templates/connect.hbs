@@ -10,7 +10,7 @@ Your Components, Routes, and Controllers are in the need of state (initial and u
 The two requirements to getting state (or parts of state) into a read-only view in your local scope is:
 
 1. use the `redux` mixin
-1. set the `stateInterest` property to indicate interest in parts of the state tree
+1. set the `connect` property to indicate interest in parts of the state tree
 
 Here are a few examples of how you might state interest in state:
 
@@ -19,13 +19,13 @@ import redux from '../mixins/redux';
 const myComponent = Ember.Component.extend(redux, {
 
   // Express interest in ALL state (by default will assign to "state" property locally)
-  stateInterest: ['.'],
+  connect: ['.'],
 
   // Express interest in the "count" and "users" trees
-  stateInterest: ['count', 'users'],
+  connect: ['count', 'users'],
 
   // Express interest in the "users" tree under the alias of "foobar"
-  stateInterest: ['users as foobar'],
+  connect: ['users as foobar'],
 
 });
 ```

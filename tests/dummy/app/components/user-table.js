@@ -5,7 +5,7 @@ import layout from '../templates/components/user-table';
 export default ReduxComponent.extend({
   layout,
   tagName: '',
-  stateInterest: ['users'],
+  connect: ['users'],
   updatedUser: {
     name: null,
     email: null,

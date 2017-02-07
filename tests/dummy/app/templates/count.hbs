@@ -36,7 +36,7 @@ If you want to follow along with the code:
 
 - [`/dummy/app/route/count.js`](https://github.com/lifegadget/ember-redux-core/blob/master/tests/dummy/app/routes/count.js)
   - the inclusion of the `redux` mixin connects the route to the state machine
-  - by defining the `stateInterest` property we indicate which properties to make available to the route's controller
+  - by defining the `connect` property we indicate which properties to make available to the route's controller
 
         > Note: the definition illustrates not only direct property mapping but also the ability to do "aliased" mappings with the "property as xxx" syntax. In this case it's not functionally needed but in many use-cases this will ensure you avoid any possible namespace collisions.
 
