@@ -1,20 +1,15 @@
 import Ember from 'ember';
+import Immutable from 'npm:immutable';
 const { get } = Ember;
 
-function defaultCompare (a, b) {
-  return a === b;
-}
-
 export default function watch(getState, objectPath, compare) {
-  compare = compare || defaultCompare;
-  let currentValue = objectPath === '.' ? getState() : get(getState(), objectPath);
+  objectPath = objectPath === '.' ? [] : objectPath.split([/./]);
+  let oldValue = Immutable.Map(getState()).getIn(objectPath);
   return function w (fn) {
     return function () {
-      const newValue = objectPath === '.' ? getState() : get(getState(), objectPath);
-      if (!compare(currentValue, newValue)) {
-        const oldValue = currentValue;
-        currentValue = newValue;
-        fn(newValue, oldValue, objectPath);
+      const newValue = Immutable.Map(getState()).getIn(objectPath);
+      if (oldValue !== newValue) {
+        fn(newValue, oldValue);
       }
     };
   };

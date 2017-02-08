@@ -3,6 +3,7 @@ import reduxStore from '../redux/storeConfig';
 import initialState from '../redux/state-initializers/index';
 import actionCreators from '../redux/actions/index';
 import watch from '../utils/watch';
+import Immutable from 'npm:immutable';
 
 const { get, set, computed, typeOf } = Ember;
 let store = {};
@@ -68,7 +69,7 @@ const redux = Ember.Service.extend({
     store = reduxStore();
     // native redux subscription to all change
     const watcher = watch(store.getState, '.');
-    store.subscribe(watcher( (post, pre, changePath) => {
+    store.subscribe(watcher( (post, pre) => {
       this.reduxSubscribers.map(fn => fn(pre, post));
     }));
     // add Ember subscribers to queue to receive relevant changes
@@ -121,14 +122,14 @@ const redux = Ember.Service.extend({
   /**
    * _notifyContainers
    *
-   * Communicates changes to state to containers who have
-   * expressed interest through their stateInterest property
+   * Communicates changes to containers who have
+   * expressed interest through their "connect" property
    */
   _notifyContainers(pre, post) {
     const stateInterests = this.get('_stateInterests');
-    Object.keys(stateInterests).map(id => {
-      if(get(pre, id) !== get(post, id)) {
-        stateInterests[id].map(interest => {
+    Object.keys(stateInterests).map(key => {
+      if(pre.get(key) !== post.get(key)) {
+        stateInterests[key].map(interest => {
           this._setState(interest.container._reduxRegistration, interest.raw);
         });
       }
@@ -143,7 +144,7 @@ const redux = Ember.Service.extend({
    */
   _notifyInitializers(pre, post) {
     Object.keys(initialState).map(key => {
-      if(get(pre, key) !== get(post, key)) {
+      if(pre.get(key) !== post.get(key)) {
         initialState[key].saveState(pre, post);
       }
     });
@@ -158,12 +159,12 @@ const redux = Ember.Service.extend({
    */
   _setState(containerId, key) {
     const { path, alias } = decomposeKey(key);
-    const state = this.getState();
-    const value = get(state, path);
+    const state = Immutable.OrderedMap(this.getState());
+    const value = path === '.' ? state : state.getIn(path);
     const container = this.registry.filter(r => r.id === containerId)[0];
     const target = this._getTargetComponent(container.context);
 
-    set(target, alias, value);
+    set(target, alias, Immutable.Iterable.isIterable(value) ? value.toJS() : value);
   },
 
   /**

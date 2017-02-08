@@ -49,12 +49,13 @@
     "ember-resolver": "^2.1.1",
     "ember-route-action-helper": "2.0.0",
     "ember-source": "^2.11.0",
+    "ember-uuid": "1.0.0",
+    "immutable": "^3.8.1",
     "loader.js": "^4.1.0",
     "redux": "^3.6.0",
     "ui-button": "2.1.11",
     "ui-input": "0.11.6",
-    "ui-markdown": "0.1.12",
-    "immutable": "^3.8.1"
+    "ui-markdown": "0.1.12"
   },
   "keywords": [
     "ember-addon",
