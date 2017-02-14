@@ -5,7 +5,7 @@ import actionCreators from '../redux/actions/index';
 import watch from '../utils/watch';
 import Immutable from 'npm:immutable';
 
-const { get, set, computed, typeOf } = Ember;
+const { get, set, put, computed, typeOf } = Ember;
 let store = {};
 
 const clone = (thingy) => {
@@ -22,14 +22,62 @@ const clone = (thingy) => {
   }
 };
 
+const safeGet = (obj, prop) => {
+  if (obj && typeof obj === 'object') {
+    console.log(obj, prop);
+    obj = Immutable.Iterable.isIterable(obj) ? obj : Immutable.OrderedMap(obj);
+    let path = prop.split(/[./]/);
+    try {
+      return obj.getIn(path);
+    } catch(e) {
+      console.warn(`Problem getting "${prop}" property on:`, obj);
+      console.error(e);
+    }
+  } else {
+    return null;
+  }
+};
+
+const toJS = (value) => {
+  return Immutable.Iterable.isIterable(value) ? value.toJS() : value;
+};
+
+const pathHasChanged = (pre, post, key) => {
+  return safeGet(pre, key) !== safeGet(post, key);
+};
+
+const getRegistrations = (path) => {
+  return path._registrations ? path._registrations : [];
+}
+
+const connectRegisteredContainers = (state, registrations) => {
+  registrations.map(registrant => {
+    // set(registrant.context, 
+    // this._setState(interest.container, interest.path);
+  });
+};
+
+const processLeafNodes = (pre, post, path, cb) => {
+  const leafs = Object.keys(path).filter(n => n !== '_registrations');
+  leafs.map(leaf => cb(safeGet(pre,leaf), safeGet(post,leaf), path[leaf]));
+};
+
+/**
+ * Take a descriptive "key" from the connect property of a container
+ * and separates into:
+ *   - the database "path" 
+ *   - the container's "property name"
+ *   - optionally an "alias" that will override the "property name" above
+ */
 const decomposeKey = function(key) {
-  const parts = key.split('[./]');
-  const prop = clone(parts).pop();
+  const parts = key.split(/[./]/);
   const hasAlias = clone(parts).pop().indexOf(' as ') !== -1;
+  const stateProperty = hasAlias ? clone(parts).pop().replace(/\s+as\s+.*/, '') : clone(parts).pop();
+  const connectedProperty = hasAlias ? clone(parts).pop().replace(/.*\s+as\s+/, '') : stateProperty;
   return {
-    prop: hasAlias ? prop.replace(/\s+as\s+.*/, '') : prop,
-    alias: hasAlias ? prop.replace(/.*\s+as\s+/, '') : prop,
-    path: key.replace(/\s+as\s+.*/, '')
+    stateProperty,
+    path: key.replace(/\s+as\s+.*/, ''),
+    connectedProperty
   };
 };
 
@@ -37,30 +85,40 @@ const redux = Ember.Service.extend({
   /**
    * A registry organised by container registration
    */
-  registry: [],
+  registry: {},
+
   reduxSubscribers: [],
   /**
-   * Returns the registry organised in an inverted fashion
-   * which is more effective for addressing change states
+   * Returns the registry organised around the various "paths"
+   * in the state tree which containers have expressed interest
    */
-  _stateInterests: computed('__registryChange__', function() {
+  paths: computed('__registryChange__', function() {
     const interests = {};
-    this.registry.map( registry => {
-      registry.keys.map(key => {
-        const { prop, alias, path } = decomposeKey(key);
-        if(!get(interests, prop)) {
-          interests[prop] = [];
-        }
-        interests[path].push({
-          container: registry.context,
-          alias: alias,
-          prop: prop,
-          path: path,
-          raw: key
+    Object.keys(this.registry).map( id => {
+      const registryItem = this.registry[id];
+      const { keys, context } = registryItem;
+      keys.map(key => {
+        const parts = key.path.split(/[./]/);
+        // ensure path structure is represented in output hash
+        parts.map((k, i) => {
+          const partialPath = parts.slice(0, i+1).join('.');
+          if(!get(interests, partialPath)) {
+            set(interests, partialPath, {});
+          }
         });
+        // add registry item to path
+        const registrationOffset = `${key.path}._registrations`;
+        const registrant = Ember.assign({ 
+          context,
+          id: context._reduxRegistration
+        }, key);
+        if (! get(interests, registrationOffset)) {
+          set(interests, registrationOffset, [ registrant ]);
+        } else {
+          get(interests, registrationOffset).push( registrant );
+        }
       });
-    });
-
+    });   
     return interests;
   }),
 
@@ -92,19 +150,20 @@ const redux = Ember.Service.extend({
    * connect
    *
    * Allows containers that need to be kept up-to-date with state
-   * to notify the service their "observation points"; it also ensures
-   * that all "action
+   * to notify the service their "observation points"
    */
   connect(id, context, keys) {
     if (Ember.typeOf(keys) !== 'array' ) {
       keys = keys ? [ keys ] :  [];
     }
-
-    this.registry.push({id, context, keys});
+    // register
+    this.registry[id] = {context, keys: keys.map(k => decomposeKey(k))};
+    // initialize containers values & setup for management
     keys.map(key => {
-      this._setState(id, key);
+      console.log('connect: ', key);
+      this._setState(context, key);
     });
-
+    // notify event system
     this.notifyPropertyChange('__registryChange__');
   },
 
@@ -115,7 +174,12 @@ const redux = Ember.Service.extend({
    * by removing the component from the registry
    */
   disconnect(id) {
-    this.registry = this.registry.filter(r => r.id !== id);
+    const keys = this.registry[id].keys;
+    const context = this.registry[id].context;
+    // clear values on container
+    keys.forEach(k => set(context, decomposeKey(k).alias || decomposeKey(k).prop, undefined));
+    // remove from registry and notify event system
+    delete this.registry[id];
     this.notifyPropertyChange('__registryChange__');
   },
 
@@ -125,13 +189,20 @@ const redux = Ember.Service.extend({
    * Communicates changes to containers who have
    * expressed interest through their "connect" property
    */
-  _notifyContainers(pre, post) {
-    const stateInterests = this.get('_stateInterests');
-    Object.keys(stateInterests).map(key => {
-      if(pre.get(key) !== post.get(key)) {
-        stateInterests[key].map(interest => {
-          this._setState(interest.container._reduxRegistration, interest.raw);
-        });
+  _notifyContainers(pre, post, paths) {
+    paths = paths ? paths : this.get('paths');
+    Object.keys(paths).map(key => {
+      if(pathHasChanged(pre, post, key)) {
+        const localizedPost = post.get(key);
+        const localizedPre = post.get(key);
+        const localizedPath = paths[key];
+        connectRegisteredContainers(localizedPost, getRegistrations(localizedPath));
+        processLeafNodes(
+          localizedPre, 
+          localizedPost, 
+          localizedPath, 
+          this._notifyContainers.bind(this)
+        );
       }
     });
   },
@@ -157,14 +228,17 @@ const redux = Ember.Service.extend({
    * has changed. If the container is a Route then it will
    * instead set the state of it's coorsponding controller.
    */
-  _setState(containerId, key) {
-    const { path, alias } = decomposeKey(key);
+  _setState(container, key) {
+    const { path, connectedProperty, stateProperty } = decomposeKey(key);
     const state = Immutable.OrderedMap(this.getState());
-    const value = path === '.' ? state : state.getIn(path);
-    const container = this.registry.filter(r => r.id === containerId)[0];
-    const target = this._getTargetComponent(container.context);
+    const value = path === '.' ? state : state.getIn(path.split(/[./]/));
+    const target = this._getTargetComponent(container);
 
-    set(target, alias, Immutable.Iterable.isIterable(value) ? value.toJS() : value);
+    set(
+      target, 
+      connectedProperty, 
+      Immutable.Iterable.isIterable(value) ? value.toJS() : value
+    );
   },
 
   /**

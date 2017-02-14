@@ -5,7 +5,7 @@ const { get, observer } = Ember;
 const connect = Ember.Mixin.create({
   redux: Ember.inject.service(),
   state: null, // all connected state will reside off of this offset to avoid name collisions
-  connect: null, // container should redefine to state their interests within state tree
+  connect: null, // container should redefine to state its interests within the state tree
 
   init() {
     this._super(...arguments);
@@ -54,9 +54,11 @@ const connect = Ember.Mixin.create({
     const keys = get(this, 'connect');
     this.get('redux').connect(id, this, keys, routesController);
     this._reduxRegistration = id;
+    console.log(`connected: ${id}`);
   },
 
   _disconnect() {
+    console.log(`disconnecting: ${this._reduxRegistration}`);
     this.get('redux').disconnect(this._reduxRegistration);
     this._reduxRegistration = null;
   },

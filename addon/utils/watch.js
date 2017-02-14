@@ -1,14 +1,15 @@
-import Ember from 'ember';
 import Immutable from 'npm:immutable';
-const { get } = Ember;
 
-export default function watch(getState, objectPath, compare) {
-  objectPath = objectPath === '.' ? [] : objectPath.split([/./]);
-  let oldValue = Immutable.Map(getState()).getIn(objectPath);
+export default function watch(getState, objectPath) {
+  objectPath = objectPath === '.' ? [] : objectPath.split([/[./]/]);
+  let oldValue = Immutable.OrderedMap(getState()).getIn(objectPath);
   return function w (fn) {
     return function () {
-      const newValue = Immutable.Map(getState()).getIn(objectPath);
+      const newValue = Immutable.OrderedMap(getState()).getIn(objectPath);
       if (oldValue !== newValue) {
+        // console.log('----');
+        // Object.keys(newValue.toJS()).map(key => oldValue.get(key) === newValue.get(key) ? console.log( `${key} is different: `, newValue.get(key).toJS()) : console.log(`${key} is the same`));
+        console.log('WATCH fn()');
         fn(newValue, oldValue);
       }
     };
