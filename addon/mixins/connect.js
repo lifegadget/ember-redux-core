@@ -1,70 +1,69 @@
 import Ember from 'ember';
 import { v4 } from 'ember-uuid';
-const { get, observer } = Ember;
+const { computed } = Ember;
 
-const connect = Ember.Mixin.create({
-  redux: Ember.inject.service(),
-  state: null, // all connected state will reside off of this offset to avoid name collisions
-  connect: null, // container should redefine to state its interests within the state tree
+const connect = (connections) => {
+  const mixin = Ember.Mixin.create({
+    redux: Ember.inject.service(),
+    reduxRegistrationId: computed(() => v4()),
 
-  init() {
-    this._super(...arguments);
-    this._isRoute = get(this, 'store') ? true : false; // TODO: find a better way to test this
-    if(!this._isRoute) {
-      this._connect();
+    init() {
+      this._super(...arguments);
+      this._isRoute = this.setupController ? true : false; // TODO: find a better way to test this
+      if(!this._isRoute) {
+        this._connect(this);
+      }
+    },
+
+    /**
+     * If the container is a route we must wait until the beforeModel
+     * hook is called before the `routeName` property will have been resolved.
+     */
+    setupController(controller) {
+      this._super(...arguments);
+      this._controllerFor = controller;
+      this._connect(controller);
+    },
+
+
+    willDestroyElement() {
+      this._super(...arguments);
+      this._disconnect();
+    },
+    willTransition() {
+      this._super(...arguments);
+      this._disconnect();
+    },
+
+    /**
+     * Responsible for connecting the container to the redux service
+     * so they may be updated with state (initial and updated)
+     */
+    _connect(target) {
+      const id = this.get('reduxRegistrationId');
+      this.get('redux').connect(id, this, connections, target);
+      console.log(`connected: ${id}`);
+    },
+
+    _disconnect() {
+      const id = this.get('reduxRegistrationId');
+      console.log(`disconnecting`);
+      this.get('redux').disconnect(id);
+      this.set('reduxRegistrationId', null);
+    },
+
+    actions: {
+      dispatch(type, value, options) {
+        const { redux } = this.getProperties('redux');
+        redux.dispatch({ type, value, options });
+      }
     }
-  },
 
-  /**
-   * If the container is a route we must wait until the beforeModel
-   * hook is called before the `routeName` property will have been resolved.
-   */
-  setupController(controller) {
-    this._super(...arguments);
-    this._controllerFor = controller;
-    this._connect();
-  },
+  });
 
-  willDestroyElement() {
-    this._super(...arguments);
-    this._disconnect();
-  },
-  willTransition() {
-    this._super(...arguments);
-    this._disconnect();
-  },
+  mixin[Ember.NAME_KEY] = 'connect-mixin';
 
-  // connectObserver: observer('connect', function() {
-  //   const connect = this.get('connect');
-  //   if (connect) {
-  //     console.log(`connecting: ${connect.join(',')}`);
-  //     this._connect();
-  //   }
-  // }),
+  return mixin;
+};
 
-  /**
-   * Responsible for connecting the container to the redux service
-   * so they may be updated with state (initial and updated)
-   */
-  _connect(routesController) {
-    if(this._reduxRegistration) {
-      return;
-    }
-    const id = v4();
-    const keys = get(this, 'connect');
-    this.get('redux').connect(id, this, keys, routesController);
-    this._reduxRegistration = id;
-    console.log(`connected: ${id}`);
-  },
-
-  _disconnect() {
-    console.log(`disconnecting: ${this._reduxRegistration}`);
-    this.get('redux').disconnect(this._reduxRegistration);
-    this._reduxRegistration = null;
-  },
-
-});
-
-
-connect[Ember.NAME_KEY] = 'connect-mixin';
 export default connect;
