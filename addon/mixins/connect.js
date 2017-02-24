@@ -53,14 +53,37 @@ const connect = (connections) => {
     },
 
     actions: {
-      dispatch(type, value, options) {
+      /**
+       * Allows for the dispatch of 
+       */
+      dispatch(type, value, options = {}) {
         const { redux } = this.getProperties('redux');
+        const different = (previous, current) => {
+          const type = options.type;
+          switch(type) {
+            case 'object': 
+              return JSON.stringify(previous) !== JSON.stringify(current);
+
+            case 'string':
+            case 'text':
+              if (!previous) { previous = ''; }
+              return previous !== current;
+
+            default:
+              return previous !== current;
+          }
+
+        };
+
+        const hasChanged = different(options.oldValue, value);
+        if (!hasChanged) {
+          return;
+        }
         redux.dispatch({ type, value, options });
       }
     }
 
   });
-
   mixin[Ember.NAME_KEY] = 'connect-mixin';
 
   return mixin;

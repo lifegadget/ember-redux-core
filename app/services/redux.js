@@ -30,25 +30,14 @@ const isRoute = (container) => {
 
 const isImmutable = (props) => {
   if (typeof props === 'string') { return false; }
+  if (!Immutable.Iterable.isIterable(props)) { return true; }
+  // assumes an array of props was sent in
   props.forEach(prop => {
     if (typeof prop !== 'string' && !Immutable.Iterable.isIterable(prop)) {
       return false;
     }
   });
   return true;
-}
-
-const safeGet = (obj, prop) => {
-  if (isImmutable(obj) && typeof obj === 'object') {
-    try {
-      return obj.get(prop);
-    } catch(e) {
-      console.warn(`Problem getting "${prop}" property on:`, obj);
-      console.error(e);
-    }
-  } else {
-    return typeof obj === 'object' ? obj[prop] : null;
-  }
 };
 
 /**
@@ -189,18 +178,17 @@ const redux = Ember.Service.extend({
 
   connectRegisteredContainers(pre, post, paths) {
     const registrations = paths[REGISTRATION_OFFSET];
-    if(registrations) {
-      registrations.forEach(registrant => {
-        // console.log('Processing registrant: ', get(registrant, 'id'), get(registrant, 'connectedProperty'), paths);
-        const before = isImmutable(pre) ? safeGet(pre, registrant.stateProperty) : pre;
-        const after = isImmutable(post) ? safeGet(post, registrant.stateProperty) : post;
-        if(before !== after) {
-          console.log(`Change detected at ${registrant.path}; setting "${registrant.connectedProperty}" to `, after );
-          const target = isRoute(registrant.context) ? registrant.context.controller : registrant.context;
-          set(target, registrant.connectedProperty, after);
-        }
-      });
-    } 
+    if(registrations && registrations.length > 0) {
+      // If there is a change, then we'll notify
+      if (post !== pre) {
+        registrations.forEach(registrant => {
+          const { context, connectedProperty } = registrant;
+          const target = isRoute(context) ? context.controller : context;
+          set(target, connectedProperty, post.toJS ? post.toJS(): post);
+        });
+      }
+    }
+    // Recurse into deeper nodes of the state tree
     Object.keys(paths).filter(p => p !== REGISTRATION_OFFSET).forEach(path => {
       if (isImmutable([pre, post]) ) {
         this.connectRegisteredContainers(pre.get(path), post.get(path), paths[path]);
