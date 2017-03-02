@@ -40,6 +40,7 @@
     "ember-cli-shims": "^1.0.2",
     "ember-cli-sri": "^2.1.1",
     "ember-cli-test-loader": "^1.1.1",
+    "ember-cli-typescript": "github:emberwatch/ember-cli-typescript",
     "ember-cli-uglify": "^1.2.0",
     "ember-composable-helpers": "2.0.0",
     "ember-disable-prototype-extensions": "^1.1.0",
@@ -68,7 +69,9 @@
     "ember-cli-babel": "^5.2.1",
     "ember-cli-htmlbars": "^1.1.1",
     "ember-get-config": "0.2.0",
-    "immutablediff": "^0.4.4"
+    "immutablediff": "^0.4.4",
+    "tslint": "^4.5.1",
+    "typescript": "^2.2.1"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"

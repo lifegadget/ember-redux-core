@@ -150,6 +150,42 @@ const redux = Ember.Service.extend({
   },
 
   /**
+   * Wraps a getActionCreator() with a dispatch call
+   */
+  dispatchActionCreator(ac) {
+    return this.dispatch(this.getActionCreator(ac)); 
+  },
+
+  /**
+   * Allows components/consumers to ask for a action creator without the need to 
+   * import the specific action creator implementation. Notation should be:
+   * 
+   *  redux.getActionCreator('database.clearUsers')
+   * 
+   * where `database` would be the name of the `import` and specific action creator
+   * function is `clearUsers`. 
+   */
+  getActionCreator(ac) {
+    const [ actionModule, actionFunction ] = ac.split('.');
+    if (!actionFunction) {
+      debug(`ember-redux-core: you called getActionCreator(string) with the wrong syntax. You passed in: ${ac}`);
+      return f => f;
+    }
+
+    if (!actionCreators[actionModule]) {
+      debug(`ember-redux-core: the action module "${actionModule}" was not found!`);
+      return f => f;
+    }
+
+    if (!actionCreators[actionModule][actionFunction]) {
+      debug(`ember-redux-core: the function "${actionFunction}" does not exist in module ${actionModule}`);
+      return f => f;
+    }
+
+    return actionCreators[actionModule][actionFunction];
+  },
+
+  /**
    * disconnect
    *
    * Disconnects the interests of the "leaving container"
@@ -183,8 +219,10 @@ const redux = Ember.Service.extend({
       if (post !== pre) {
         registrations.forEach(registrant => {
           const { context, connectedProperty } = registrant;
-          const target = isRoute(context) ? context.controller : context;
-          set(target, connectedProperty, post.toJS ? post.toJS(): post);
+          if(isRoute(context)) {
+            set(context.controller, connectedProperty, post.toJS ? post.toJS(): post);
+          }
+          set(context, connectedProperty, post.toJS ? post.toJS(): post);
         });
       }
     }
