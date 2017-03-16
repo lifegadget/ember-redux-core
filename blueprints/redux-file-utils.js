@@ -4,8 +4,7 @@ const fs          = require('fs');
 const path        = require('path');
 const chalk       = require('chalk');
 
-// distinguishes between an ADDON and APP's root
-// directory
+// distinguishes between an ADDON and APP's root directory
 const rootToken = function rootToken(context) {
   return (options) => pathAddonVersusApp(context, options.inAddon);
 };

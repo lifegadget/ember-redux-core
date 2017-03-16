@@ -7,7 +7,7 @@ import Immutable from 'npm:immutable';
 
 const REGISTRATION_OFFSET = '_registrations';
 
-const { get, set, computed, typeOf } = Ember;
+const { get, set, run, computed, typeOf, debug, RSVP: { Promise } } = Ember;
 let store = {};
 
 const clone = (thingy) => {
@@ -25,7 +25,7 @@ const clone = (thingy) => {
 };
 
 const isRoute = (container) => {
-  return container.setupController ? true : false;
+  return container.setupController && !container.isComponent ? true : false;
 };
 
 const isImmutable = (props) => {
@@ -68,10 +68,19 @@ const redux = Ember.Service.extend({
    */
   registry: {},
   reduxSubscribers: [],
+  _dispatchListeners: [],
 
   init() {
     this._super(...arguments);
     store = reduxStore();
+    const reduxDispatch = store.dispatch;
+    const dispatchListening = (action) => {
+      this._dispatchListeners.forEach(listener => listener.fn(action));
+    };
+    store.dispatch = (action) => {
+      reduxDispatch(action);
+      dispatchListening(action);
+    }
     // native redux subscription to all change
     const watcher = watch(store.getState, '.');
     store.subscribe(watcher( (post, pre) => {
@@ -128,32 +137,12 @@ const redux = Ember.Service.extend({
     return interests;
   }),
 
-  /**
-   * connect
-   *
-   * Allows containers that need to be kept up-to-date with state
-   * to notify the service their "observation points"; also allows
-   * a route to send in a target which is variant from the context
-   */
-  connect(id, context, keys, target) {
-    if (Ember.typeOf(keys) !== 'array' ) {
-      keys = keys ? [ keys ] :  [];
-    }
-    // register
-    this.registry[id] = {context, keys: keys.map(k => decomposeKey(k))};
-    // initialize containers values & setup for management
-    keys.map(key => {
-      this._setState(target, key);
-    });
-    // notify event system
-    this.notifyPropertyChange('__registryChange__');
-  },
 
   /**
    * Wraps a getActionCreator() with a dispatch call
    */
-  dispatchActionCreator(ac) {
-    return this.dispatch(this.getActionCreator(ac)); 
+  dispatchActionCreator(ac, ...params) {
+    return this.dispatch(this.getActionCreator(ac)(...params)); 
   },
 
   /**
@@ -185,6 +174,56 @@ const redux = Ember.Service.extend({
     return actionCreators[actionModule][actionFunction];
   },
 
+ /**
+   * connect
+   *
+   * Allows containers that need to be kept up-to-date with state
+   * to notify the service their "observation points"; also allows
+   * a route to send in a target which is variant from the context
+   */
+  connect(id, context, keys, target) {
+    if (Ember.typeOf(keys) !== 'array' ) {
+      keys = keys ? [ keys ] :  [];
+    }
+    // register
+    this.registry[id] = {context, keys: keys.map(k => decomposeKey(k))};
+    // initialize containers values & setup for management
+    keys.map(key => {
+      this._setState(target, key);
+    });
+    // notify event system
+    this.notifyPropertyChange('__registryChange__');
+  },
+
+  /**
+   * waitFor
+   * 
+   * @param {string} actionToLookFor the action.type string or a subset of the string
+   * @param {int}    timeout  an integer value for the timeout timeframe
+   * @return {Promise}        resolves the first action which meets action string or rejects in the case of a timeout 
+   */
+  waitFor(actionToLookFor, timeout = 1000) {
+    const id = Math.random().toString(36).substr(2, 16);
+    const fn = (target, resolve) => (action) => {
+      if (action.type.indexOf(target) !== -1) {
+        resolve(action);
+      }
+    };
+
+    return new Promise((resolve, reject) => {
+
+      this._dispatchListeners.push({id, fn: fn(actionToLookFor, resolve)});
+      run.later(() => {
+        this._dispatchListeners = this._dispatchListeners.filter(l => l.id !== id);
+        reject({
+          code: 'waitFor/timeout',
+          message: `timed out waiting for "${actionToLookFor}" after ${timeout}ms`
+        });
+      }, timeout);
+
+    });
+  },
+
   /**
    * disconnect
    *
@@ -192,12 +231,15 @@ const redux = Ember.Service.extend({
    * by removing the component from the registry
    */
   disconnect(id) {
-    const keys = this.registry[id].keys;
-    const context = this.registry[id].context;
-    // clear values on container
-    keys.forEach(k => set(context, decomposeKey(k).alias || decomposeKey(k).prop, undefined));
-    // remove from registry and notify event system
-    delete this.registry[id];
+    const registry = this.registry[id];
+    if (registry) {
+      const keys = get(registry, `keys`) || [];
+      const context = get(registry, 'context');
+      // clear values on container
+      // keys.forEach(k => set(context, decomposeKey(k).alias || decomposeKey(k).prop, undefined));
+      // remove from registry and notify event system
+      delete this.registry[id];
+    }
     this.notifyPropertyChange('__registryChange__');
   },
 
@@ -220,15 +262,19 @@ const redux = Ember.Service.extend({
         registrations.forEach(registrant => {
           const { context, connectedProperty } = registrant;
           if(isRoute(context)) {
-            set(context.controller, connectedProperty, post.toJS ? post.toJS(): post);
+            set(context.controller, connectedProperty, Immutable.Iterable.isIterable(post) 
+              ? post.toJS()
+              : post);
           }
-          set(context, connectedProperty, post.toJS ? post.toJS(): post);
+          set(context, connectedProperty, Immutable.Iterable.isIterable(post) 
+            ? post.toJS()
+            : post);
         });
       }
     }
     // Recurse into deeper nodes of the state tree
     Object.keys(paths).filter(p => p !== REGISTRATION_OFFSET).forEach(path => {
-      if (isImmutable([pre, post]) ) {
+      if (isImmutable([pre, post]) && pre && post) {
         this.connectRegisteredContainers(pre.get(path), post.get(path), paths[path]);
       }
     });

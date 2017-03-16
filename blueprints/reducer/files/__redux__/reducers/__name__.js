@@ -1,4 +1,5 @@
-import Ember from 'ember';
+import Immutable from 'npm:immutable';
+
 /**
  * <%= dasherizedModuleName %> Reducer
  *
@@ -14,17 +15,13 @@ import Ember from 'ember';
  * a default value for state and handle all unknown
  * actions by returning the state back unchanged.
  */
-const defaultState = {};
+const defaultState = Immutable.OrderedMap();
 const reducer = (state, action) => {
 
   switch(action.type) {
 
-    case 'FOO':
-      return Ember.assign({}, state, {
-        uno: 1,
-        dos: 2,
-        tres: 3
-      });
+    case 'ABC':
+      return defaultState;
 
     default:
       return state || defaultState;
@@ -33,3 +30,4 @@ const reducer = (state, action) => {
 };
 
 export default reducer;
+

@@ -10,7 +10,7 @@ const connect = (connections) => {
     init() {
       this._super(...arguments);
       this._isRoute = this.setupController ? true : false; // TODO: find a better way to test this
-      if(!this._isRoute) {
+      if(!this._isRoute && !this.isComponent) {
         this._connect(this);
       }
     },
@@ -25,11 +25,17 @@ const connect = (connections) => {
       this._connect(controller);
     },
 
+    didInsertElement() {
+      if(this.isComponent) {
+        this._connect(this);
+      }
+    },
 
     willDestroyElement() {
       this._super(...arguments);
       this._disconnect();
     },
+
     willTransition() {
       this._super(...arguments);
       this._disconnect();
@@ -47,7 +53,7 @@ const connect = (connections) => {
 
     _disconnect() {
       const id = this.get('reduxRegistrationId');
-      console.log(`disconnecting`);
+      console.log(`disconnecting: ${id}`);
       this.get('redux').disconnect(id);
       this.set('reduxRegistrationId', null);
     },
@@ -80,6 +86,7 @@ const connect = (connections) => {
           return;
         }
         redux.dispatch({ type, value, options });
+        return value;
       }
     }
 

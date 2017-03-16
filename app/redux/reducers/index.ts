@@ -1,5 +1,5 @@
-import redux from 'npm:redux';
-const { combineReducers } = redux;
+import ReduxImmutable from 'npm:redux-immutable';
+const { combineReducers } = ReduxImmutable;
 
 /**
  * This is the master reducer, it partitions the jobs amounts
