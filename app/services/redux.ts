@@ -3,7 +3,7 @@ import reduxStore from '../redux/storeConfig';
 import initialState from '../redux/state-initializers/index';
 import actionCreators from '../redux/actions/index';
 import watch from '../utils/watch';
-import Immutable from 'npm:immutable';
+import * as Immutable from 'npm:immutable';
 
 const REGISTRATION_OFFSET = '_registrations';
 
@@ -73,14 +73,16 @@ const redux = Ember.Service.extend({
   init() {
     this._super(...arguments);
     store = reduxStore();
-    const reduxDispatch = store.dispatch;
-    const dispatchListening = (action) => {
-      this._dispatchListeners.forEach(listener => listener.fn(action));
-    };
-    store.dispatch = (action) => {
-      reduxDispatch(action);
-      dispatchListening(action);
-    }
+
+    // const reduxDispatch = store.dispatch;
+    // const dispatchListening = (action) => {
+    //   this._dispatchListeners.forEach(listener => listener.fn(action));
+    // };
+    // store.dispatch = (action) => {
+    //   reduxDispatch(action);
+    //   dispatchListening(action);
+    // }
+
     // native redux subscription to all change
     const watcher = watch(store.getState, '.');
     store.subscribe(watcher( (post, pre) => {
@@ -180,19 +182,25 @@ const redux = Ember.Service.extend({
    * Allows containers that need to be kept up-to-date with state
    * to notify the service their "observation points"; also allows
    * a route to send in a target which is variant from the context
+   * 
+   * Returns a promise which resolves when state has been set 
    */
   connect(id, context, keys, target) {
-    if (Ember.typeOf(keys) !== 'array' ) {
-      keys = keys ? [ keys ] :  [];
-    }
-    // register
-    this.registry[id] = {context, keys: keys.map(k => decomposeKey(k))};
-    // initialize containers values & setup for management
-    keys.map(key => {
-      this._setState(target, key);
+    // const waitForState = [];
+    return new Promise((resolve) => {
+      if (Ember.typeOf(keys) !== 'array' ) {
+        keys = keys ? [ keys ] :  [];
+      }
+      // register
+      this.registry[id] = {context, keys: keys.map(k => decomposeKey(k))};
+      // initialize containers values & setup for management
+      keys.map(key => {
+        this._setState(target, key);
+      });
+      // notify event system
+      this.notifyPropertyChange('__registryChange__');
+      resolve();
     });
-    // notify event system
-    this.notifyPropertyChange('__registryChange__');
   },
 
   /**
@@ -204,8 +212,12 @@ const redux = Ember.Service.extend({
    */
   waitFor(actionToLookFor, timeout = 1000) {
     const id = Math.random().toString(36).substr(2, 16);
+    const unsubscribe = (id) => {
+      this._dispatchListeners = this._dispatchListeners.filter(l => l.id !== id);
+    };
     const fn = (target, resolve) => (action) => {
-      if (action.type.indexOf(target) !== -1) {
+      if (action.type && action.type.indexOf(target) !== -1) {
+        unsubscribe(id);
         resolve(action);
       }
     };
@@ -214,7 +226,7 @@ const redux = Ember.Service.extend({
 
       this._dispatchListeners.push({id, fn: fn(actionToLookFor, resolve)});
       run.later(() => {
-        this._dispatchListeners = this._dispatchListeners.filter(l => l.id !== id);
+        unsubscribe(id);
         reject({
           code: 'waitFor/timeout',
           message: `timed out waiting for "${actionToLookFor}" after ${timeout}ms`

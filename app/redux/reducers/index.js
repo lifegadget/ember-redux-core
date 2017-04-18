@@ -1,6 +1,7 @@
-import * as ReduxImmutable from 'npm:redux-immutable';
-const { combineReducers } = ReduxImmutable;
-
+"use strict";
+exports.__esModule = true;
+var npm_redux_immutable_1 = require("npm:redux-immutable");
+var combineReducers = npm_redux_immutable_1["default"].combineReducers;
 /**
  * This is the master reducer, it partitions the jobs amounts
  * one or more other reducers which take on responsibility for
@@ -15,4 +16,4 @@ const { combineReducers } = ReduxImmutable;
  * Note: only VERY small applications should be managed by a single
  * reducer file.
  */
-export default combineReducers({});
+exports["default"] = combineReducers({});

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "es2015",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "noEmitOnError": false,
+    "noEmit": true,
+    "baseUrl": ".",
+    "outDir": "./",
+    "paths": {
+      "npm:*": ["node_modules/*"],
+      "*": ["node_modules/*"]
+    }
+  },
+  "include": [
+    "app/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

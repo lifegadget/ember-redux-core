@@ -7,10 +7,11 @@ export default Ember.Helper.extend({
   compute([type], options) {
     const redux = this.get('redux');
     // if dot notation detected then type is reference to an action creator
-    if (type.indexOf('.')) {
+    if (type.indexOf('.') !== -1) {
       redux.dispatch(redux.getActionCreator(type)(options));
     } else {
-      redux.dispatch(Ember.assign({type}, options));
+      console.log(`dispatching ${type}:`, options); 
+      // redux.dispatch(Ember.assign({type}, options));
     }
     return options;
   }  

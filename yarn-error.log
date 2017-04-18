@@ -1,14 +1,14 @@
 Arguments: 
-  /usr/local/bin/node /usr/local/bin/yarn add --dev @typings/redux
+  /usr/local/bin/node /usr/local/bin/yarn
 
 PATH: 
   /usr/local/bin:/Users/ken/.yarn/bin:/Applications/Android/sdk/platform-tools:.:/usr/local/sbin:/usr/local/bin:/opt/local/bin:/opt/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Users/ken/.rvm/bin:/Users/ken/.ec2/bin:/Developer/usr/bin:/Users/ken/pear/bin:/usr/local/share/npm/bin:/Applications/Couchbase Server.app/Contents/Resources/couchbase-core/bin:/Users/ken/repos/mine/api/commandline/bin
 
 Yarn version: 
-  0.20.3
+  0.22.0
 
 Node version: 
-  6.9.5
+  6.10.2
 
 Platform: 
   darwin x64
@@ -6686,14 +6686,6 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/yeast/-/yeast-0.1.2.tgz#008e06d8094320c372dbc2f8ed76a0ca6c8ac419"
 
 Trace: 
-  Error: https://registry.yarnpkg.com/@typings%2fredux: Not found
-      at Request.params.callback [as _callback] (/usr/local/lib/node_modules/yarn/lib/util/request-manager.js:313:18)
-      at Request.self.callback (/usr/local/lib/node_modules/yarn/node_modules/request/request.js:186:22)
-      at emitTwo (events.js:106:13)
-      at Request.emit (events.js:191:7)
-      at Request.<anonymous> (/usr/local/lib/node_modules/yarn/node_modules/request/request.js:1081:10)
-      at emitOne (events.js:96:13)
-      at Request.emit (events.js:188:7)
-      at IncomingMessage.<anonymous> (/usr/local/lib/node_modules/yarn/node_modules/request/request.js:1001:12)
-      at IncomingMessage.g (events.js:291:16)
-      at emitNone (events.js:91:20)
+  Error: getaddrinfo ENOTFOUND github.com github.com:443
+      at errnoException (dns.js:28:10)
+      at GetAddrInfoReqWrap.onlookup [as oncomplete] (dns.js:76:26)

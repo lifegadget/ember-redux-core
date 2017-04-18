@@ -6,11 +6,25 @@ const connect = (connections) => {
   const mixin = Ember.Mixin.create({
     redux: Ember.inject.service(),
     reduxRegistrationId: computed(() => v4()),
+    reduxContainerType: computed(function() {
+      if (this instanceof Ember.Controller) {
+        return 'controller';
+      }
+      if (this instanceof Ember.Route) {
+        return 'route';
+      }
+      if (this instanceof Ember.Component) {
+        return 'component';
+      }
+      if (this instanceof Ember.Service) {
+        return 'service';
+      }
+    }),
 
     init() {
       this._super(...arguments);
-      this._isRoute = this.setupController ? true : false; // TODO: find a better way to test this
-      if(!this._isRoute && !this.isComponent) {
+      const containerType = this.get('reduxContainerType');
+      if(containerType === 'service') {
         this._connect(this);
       }
     },
@@ -47,7 +61,12 @@ const connect = (connections) => {
      */
     _connect(target) {
       const id = this.get('reduxRegistrationId');
-      this.get('redux').connect(id, this, connections, target);
+      this.get('redux').connect(id, this, connections, target)
+        .then(() => {
+          if(Ember.typeOf(this.onConnect) === 'function') {
+            this.onConnect(connections);
+          }
+        });
       console.log(`connected: ${id}`);
     },
 
@@ -64,28 +83,14 @@ const connect = (connections) => {
        */
       dispatch(type, value, options = {}) {
         const { redux } = this.getProperties('redux');
-        const different = (previous, current) => {
-          const type = options.type;
-          switch(type) {
-            case 'object': 
-              return JSON.stringify(previous) !== JSON.stringify(current);
-
-            case 'string':
-            case 'text':
-              if (!previous) { previous = ''; }
-              return previous !== current;
-
-            default:
-              return previous !== current;
-          }
-
-        };
-
-        const hasChanged = different(options.oldValue, value);
-        if (!hasChanged) {
-          return;
+        console.log(type, value, options);
+        if (type.indexOf('.') !== -1) {
+          const ac = redux.getActionCreator(type);
+          ac(value, options);
+        } else {
+          redux.dispatch({ type, value, options });
         }
-        redux.dispatch({ type, value, options });
+
         return value;
       }
     }

@@ -9,7 +9,7 @@ module.exports = {
     browser: true
   },
   rules: {
-    "no-console": ["warn", {allow: ["warn", "error"]}],
+    "no-console": 0,
     "no-unused-vars": 1,
     "no-case-declarations": 0,
   }
