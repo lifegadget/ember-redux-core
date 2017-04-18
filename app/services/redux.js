@@ -3,28 +3,13 @@ import reduxStore from '../redux/storeConfig';
 import initialState from '../redux/state-initializers/index';
 import actionCreators from '../redux/actions/index';
 import watch from '../utils/watch';
-import * as Immutable from 'npm:immutable';
+import Immutable from 'npm:immutable';
 
 const REGISTRATION_OFFSET = '_registrations';
 
 const { get, set, run, computed, typeOf, debug, RSVP: { Promise } } = Ember;
 
-export interface IDictionary<T>{
-  [name: string]: T;
-}
-
-export interface IAction extends IDictionary<any> {
-  type: string;
-}
-
-export interface IReduxStore {
-  getState: () => IDictionary<any>;
-  subscribe: (listener: () => void) => () => void;
-  unsubscribe: () => void;
-  dispatch: (action: IAction) => IAction;
-}
-
-let store: IReduxStore;
+let store;
 
 const clone = (thingy) => {
   switch(typeOf(thingy)) {
@@ -289,7 +274,7 @@ const redux = Ember.Service.extend({
       if (post !== pre) {
         registrations.forEach(registrant => {
           const { context, connectedProperty } = registrant;
-          if(isRoute(context)) {
+          if(get(context, 'reduxContainerType') === 'route') {
             set(context.controller, connectedProperty, Immutable.Iterable.isIterable(post) 
               ? post.toJS()
               : post);

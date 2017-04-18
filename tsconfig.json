@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2015",
+    "target": "es2016",
     "moduleResolution": "node",
     "allowJs": true,
     "noEmitOnError": false,
@@ -8,14 +8,15 @@
     "baseUrl": ".",
     "outDir": "./",
     "paths": {
-      "npm:*": ["node_modules/*"],
+      "npm:*": ["node_modules/*", "*"],
       "*": ["node_modules/*"]
     }
   },
   "include": [
-    "app/**/*.ts"
+    "app/**/*.ts",
+    "app/services/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules/**/*.ts"
   ]
 }

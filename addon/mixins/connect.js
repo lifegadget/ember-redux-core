@@ -40,7 +40,7 @@ const connect = (connections) => {
     },
 
     didInsertElement() {
-      if(this.isComponent) {
+      if(this.get('reduxContainerType') === 'component') {
         this._connect(this);
       }
     },
@@ -67,12 +67,12 @@ const connect = (connections) => {
             this.onConnect(connections);
           }
         });
-      console.log(`connected: ${id}`);
+      console.log(`${this.get('reduxContainerType')} connected: ${id}`);
     },
 
     _disconnect() {
       const id = this.get('reduxRegistrationId');
-      console.log(`disconnecting: ${id}`);
+      console.log(`${this.get('reduxContainerType')} disconnecting: ${id}`);
       this.get('redux').disconnect(id);
       this.set('reduxRegistrationId', null);
     },
