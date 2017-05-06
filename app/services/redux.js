@@ -6,8 +6,6 @@ import actionCreators from '../redux/actions/index';
 import watch from '../utils/watch';
 import Immutable from 'npm:immutable';
 
-const REGISTRATION_OFFSET = '_registrations';
-
 const { get, set, run, computed, typeOf, debug, RSVP: { Promise } } = Ember;
 /**
  * For each part of the state tree which containers are 
@@ -34,21 +32,9 @@ const clone = (thingy) => {
   }
 };
 
-const isRoute = (container) => {
-  return container.reduxContainerType === 'route' ? true : false;
-};
-
-const isImmutable = (props) => {
-  if (typeof props === 'string') { return false; }
-  if (!Immutable.Iterable.isIterable(props)) { return true; }
-  // assumes an array of props was sent in
-  props.forEach(prop => {
-    if (typeof prop !== 'string' && !Immutable.Iterable.isIterable(prop)) {
-      return false;
-    }
-  });
-  return true;
-};
+const toJS = (thingy) => {
+  return Immutable.Iterable.isIterable(thingy) ? thingy.toJS() : thingy;
+}
 
 /**
  * Take a descriptive "key" from the connect property of a container
@@ -87,26 +73,24 @@ const redux = Ember.Service.extend({
     // native redux subscription to all change
     const watcher = watch(store.getState, '.');
     // distribute "changes" to relevant containers
-    store.subscribe(watcher( (post, pre) => {
+    store.subscribe(watcher( (post) => {
       const paths = this.get('paths');
       Object.keys(paths).map(key => {
         const stateTree = post.getIn(key.split('.'));
-        console.log(`state tree [${key}]: `, stateTree);
         const oldHashValue = stateHashCodes[key];
         const newHashValue = stateTree ? stateTree.hashCode() : null;
         if(newHashValue !== oldHashValue) {
+          console.log(`state tree [${key}]: `, stateTree);
           stateHashCodes[key] = newHashValue;
           this._notifySubscribersOfChange(key, post.getIn(key.split('.')));
         }
       });
-
-      this.reduxSubscribers.map(fn => fn(pre, post));
     }));
-    // ensure "connect subscribers" and "state initializers" receive changes to state
-    this.subscribe(this._notifyInitializers.bind(this));
-    // keep reference to actionCreators within the service
+    store.subscribe(watcher((pre, post) => this._notifyInitializersOfChange(pre, post)));
+
     this._actionCreators = actionCreators;
   },
+
   getState() {
     return store.getState();
   },
@@ -242,15 +226,9 @@ const redux = Ember.Service.extend({
    * by removing the component from the registry
    */
   disconnect(id) {
-    const registry = this.registry[id];
-    if (registry) {
-      const keys = get(registry, `keys`) || [];
-      const context = get(registry, 'context');
-      // clear values on container
-      // keys.forEach(k => set(context, decomposeKey(k).alias || decomposeKey(k).prop, undefined));
-      // remove from registry and notify event system
-      delete this.registry[id];
-    }
+    const registry = Ember.assign({}, this.registry);
+    delete registry[id];
+    this.registry = registry;
     this.notifyPropertyChange('__registryChange__');
   },
 
@@ -272,23 +250,25 @@ const redux = Ember.Service.extend({
       if(containerType === 'route') {
         targets.push(subscriber.context.controller);
       }
-      targets.forEach(t => set(t, connectedProperty, Immutable.Iterable.isIterable(stateTree)
-        ? stateTree.toJS()
-        : stateTree
-      ))
+      targets.forEach(t => t.set(connectedProperty, toJS(stateTree)));
     })
   },
 
   /**
    * _notifyInitializers
    *
-   * Communicates changes to state-initializers who are managing
-   * the part of state which changed
+   * Communicates a relevant change in state to the
+   * State Initializers so they can save their respective state
    */
-  _notifyInitializers(pre, post) {
+  _notifyInitializersOfChange(oldState, newState) {
+
     Object.keys(initialState).map(key => {
-      if(pre.get(key) !== post.get(key)) {
-        initialState[key].saveState(pre, post);
+      const oldHashCode = stateHashCodes[key] ? stateHashCodes[key] : null;
+      const currentHashCode = newState ? newState.get(key).hashCode() : null;
+      if(initialState[key].saveState && oldHashCode !== currentHashCode) {
+        console.log(`handing ${key} to state-initializer's saveState()`);
+        if(oldHashCode === null) { stateHashCodes[key] = currentHashCode; }
+        initialState[key].saveState(newState);
       }
     });
   },
@@ -300,7 +280,7 @@ const redux = Ember.Service.extend({
    * has changed.
    */
   _setState(container, key) {
-    const { path, connectedProperty, stateProperty } = decomposeKey(key);
+    const { path, connectedProperty } = decomposeKey(key);
     const state = Immutable.Map(this.getState());
     const value = path === '.' ? state : state.getIn(path.split(/[./]/));
 
