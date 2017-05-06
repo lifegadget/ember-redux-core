@@ -15,7 +15,7 @@ import Immutable from 'npm:immutable';
  * a default value for state and handle all unknown
  * actions by returning the state back unchanged.
  */
-const defaultState = Immutable.OrderedMap();
+const defaultState = Immutable.Map();
 const reducer = (state, action) => {
 
   switch(action.type) {

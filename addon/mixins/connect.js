@@ -63,8 +63,10 @@ const connect = (connections) => {
       const id = this.get('reduxRegistrationId');
       this.get('redux').connect(id, this, connections, target)
         .then(() => {
-          if(Ember.typeOf(this.onConnect) === 'function') {
-            this.onConnect(connections);
+          if(Ember.typeOf(this.didConnect) === 'function') {
+            // fired at point time state-initializers have set state
+            // and this has been set in connected containers
+            this.didConnect(connections); 
           }
         });
       console.log(`${this.get('reduxContainerType')} connected: ${id}`);

@@ -15,6 +15,7 @@
   "bugs": {
     "url": "https://github.com/lifegadget/ember-redux-core/issues"
   },
+  "types": "./app/services/redux.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/lifegadget/ember-redux-core"

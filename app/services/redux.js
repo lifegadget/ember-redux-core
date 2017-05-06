@@ -1,3 +1,4 @@
+// @ts-check
 import Ember from 'ember';
 import reduxStore from '../redux/storeConfig';
 import initialState from '../redux/state-initializers/index';
@@ -8,9 +9,17 @@ import Immutable from 'npm:immutable';
 const REGISTRATION_OFFSET = '_registrations';
 
 const { get, set, run, computed, typeOf, debug, RSVP: { Promise } } = Ember;
+/**
+ * For each part of the state tree which containers are 
+ * interested in, we will maintain a list of hashcodes 
+ * which represents the value of that part of the state tree.
+ * 
+ * The map will be keyed off the path/slice in the state tree that 
+ * containers are interested.
+ */
+let stateHashCodes = Immutable.Map();
 
 let store;
-
 const clone = (thingy) => {
   switch(typeOf(thingy)) {
     case 'array':
@@ -75,25 +84,27 @@ const redux = Ember.Service.extend({
     this._super(...arguments);
     store = reduxStore();
 
-    // const reduxDispatch = store.dispatch;
-    // const dispatchListening = (action) => {
-    //   this._dispatchListeners.forEach(listener => listener.fn(action));
-    // };
-    // store.dispatch = (action) => {
-    //   reduxDispatch(action);
-    //   dispatchListening(action);
-    // }
-
     // native redux subscription to all change
     const watcher = watch(store.getState, '.');
+    // distribute "changes" to relevant containers
     store.subscribe(watcher( (post, pre) => {
+      const paths = this.get('paths');
+      Object.keys(paths).map(key => {
+        const stateTree = post.getIn(key.split('.'));
+        console.log(`state tree [${key}]: `, stateTree);
+        const oldHashValue = stateHashCodes[key];
+        const newHashValue = stateTree ? stateTree.hashCode() : null;
+        if(newHashValue !== oldHashValue) {
+          stateHashCodes[key] = newHashValue;
+          this._notifySubscribersOfChange(key, post.getIn(key.split('.')));
+        }
+      });
+
       this.reduxSubscribers.map(fn => fn(pre, post));
     }));
-    // ensure "connect subscribers" and "state initializers" 
-    // receive changes to state
-    this.subscribe(this._notifyContainers.bind(this));
+    // ensure "connect subscribers" and "state initializers" receive changes to state
     this.subscribe(this._notifyInitializers.bind(this));
-    // store actionCreators in service
+    // keep reference to actionCreators within the service
     this._actionCreators = actionCreators;
   },
   getState() {
@@ -107,36 +118,24 @@ const redux = Ember.Service.extend({
   },
 
   /**
-   * Returns the registry organised around the various "paths"
-   * in the state tree which containers have expressed interest
+   * Returns a hash of keys which registered containers are 
+   * interested in. Hash is keyed by state subset/slices and
+   * is an array of subscribers who care about that section of
+   * state
    */
   paths: computed('__registryChange__', function() {
+    console.log('CALC REGISTRY PATHS');
     const interests = {};
+    const addInterest = (path, context) => {
+      if(!interests[path]) { interests[path] = []; }
+      interests[path].push(context);  
+    }
     Object.keys(this.registry).map( id => {
-      const registryItem = this.registry[id];
-      const { keys, context } = registryItem;
-      keys.map(key => {
-        const parts = key.path.split(/[./]/);
-        // ensure path structure is represented in output hash
-        parts.map((k, i) => {
-          const partialPath = parts.slice(0, i+1).join('.');
-          if(!get(interests, partialPath)) {
-            set(interests, partialPath, {});
-          }
-        });
-        // add registry item to path
-        const registrationOffset = `${key.path}.${REGISTRATION_OFFSET}`;
-        const registrant = Ember.assign({ 
-          context,
-          id: get(context, 'reduxRegistrationId')
-        }, key);
-        if (! get(interests, registrationOffset)) {
-          set(interests, registrationOffset, [ registrant ]);
-        } else {
-          get(interests, registrationOffset).push( registrant );
-        }
-      });
-    });   
+      const { keys } = this.registry[id];
+      const paths = keys.map(k => k.path);
+      paths.forEach(path => addInterest(path, id));
+    });
+
     return interests;
   }),
 
@@ -187,7 +186,6 @@ const redux = Ember.Service.extend({
    * Returns a promise which resolves when state has been set 
    */
   connect(id, context, keys, target) {
-    // const waitForState = [];
     return new Promise((resolve) => {
       if (Ember.typeOf(keys) !== 'array' ) {
         keys = keys ? [ keys ] :  [];
@@ -207,9 +205,9 @@ const redux = Ember.Service.extend({
   /**
    * waitFor
    * 
-   * @param {string} actionToLookFor the action.type string or a subset of the string
-   * @param {int}    timeout  an integer value for the timeout timeframe
-   * @return {Promise}        resolves the first action which meets action string or rejects in the case of a timeout 
+   * @param {string}    actionToLookFor  the action.type string or a subset of the string
+   * @param {number}    timeout          an integer value for the timeout timeframe
+   * @return {Promise}                    resolves the first action which meets action string or rejects in the case of a timeout 
    */
   waitFor(actionToLookFor, timeout = 1000) { 
     const id = Math.random().toString(36).substr(2, 16);
@@ -257,40 +255,28 @@ const redux = Ember.Service.extend({
   },
 
   /**
-   * _notifyContainers
+   * _notifySubscribersOfChange
    *
    * Communicates changes to containers who have
    * expressed interest through their "connect" property
    */
-  _notifyContainers(pre, post) {
+  _notifySubscribersOfChange(path, stateTree) {
     const paths = this.get('paths');
-    this.connectRegisteredContainers(pre, post, paths);
-  },
-
-  connectRegisteredContainers(pre, post, paths) {
-    const registrations = paths[REGISTRATION_OFFSET];
-    if(registrations && registrations.length > 0) {
-      // If there is a change, then we'll notify
-      if (post !== pre) {
-        registrations.forEach(registrant => {
-          const { context, connectedProperty } = registrant;
-          if(get(context, 'reduxContainerType') === 'route') {
-            set(context.controller, connectedProperty, Immutable.Iterable.isIterable(post) 
-              ? post.toJS()
-              : post);
-          }
-          set(context, connectedProperty, Immutable.Iterable.isIterable(post) 
-            ? post.toJS()
-            : post);
-        });
+    const subscribers = paths[path];
+    console.log(`notifying subscribers of change to [${path}]`, subscribers);
+    subscribers.forEach(subscriberId => {
+      const subscriber = this.registry[subscriberId];
+      const connectedProperty = subscriber.keys.filter(k => k.path === path)[0].connectedProperty;
+      const containerType = get(subscriber, 'context.reduxContainerType');
+      const targets = [subscriber.context];
+      if(containerType === 'route') {
+        targets.push(subscriber.context.controller);
       }
-    }
-    // Recurse into deeper nodes of the state tree
-    Object.keys(paths).filter(p => p !== REGISTRATION_OFFSET).forEach(path => {
-      if (isImmutable([pre, post]) && pre && post) {
-        this.connectRegisteredContainers(pre.get(path), post.get(path), paths[path]);
-      }
-    });
+      targets.forEach(t => set(t, connectedProperty, Immutable.Iterable.isIterable(stateTree)
+        ? stateTree.toJS()
+        : stateTree
+      ))
+    })
   },
 
   /**
@@ -315,7 +301,7 @@ const redux = Ember.Service.extend({
    */
   _setState(container, key) {
     const { path, connectedProperty, stateProperty } = decomposeKey(key);
-    const state = Immutable.OrderedMap(this.getState());
+    const state = Immutable.Map(this.getState());
     const value = path === '.' ? state : state.getIn(path.split(/[./]/));
 
     set(
