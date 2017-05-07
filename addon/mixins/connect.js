@@ -72,10 +72,6 @@ const connect = (connections) => {
       console.log(`${this.get('reduxContainerType')} connected: ${id}`);
     },
 
-    _set(prop, value) {
-      this.set(prop, value);
-    },
-
     _disconnect() {
       const {reduxContainerType, reduxRegistrationId } = this.getProperties('reduxContainerType', 'reduxRegistrationId');
       console.log(`disconnecting ${reduxContainerType} ${reduxRegistrationId}`);

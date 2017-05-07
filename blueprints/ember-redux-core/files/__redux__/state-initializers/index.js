@@ -28,10 +28,8 @@ export function loadState(config) {
   return state;
 }
 
-export function saveState(pre, post) {
+export function saveState(post, pre) {
   modules.map(m => {
-    if(get(pre, m) !== get(post, m)) {
-      get(this, m).saveState(pre, post);
-    }
+    this[m].saveState(post, pre);
   });
 }

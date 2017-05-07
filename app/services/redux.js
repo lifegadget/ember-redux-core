@@ -5,7 +5,9 @@ import initialState from '../redux/state-initializers/index';
 import actionCreators from '../redux/actions/index';
 import watch from '../utils/watch';
 import Immutable from 'npm:immutable';
+import StateCache from 'ember-redux-core/utils/redux-state-cache';
 
+const cache = new StateCache();
 const { get, set, run, computed, typeOf, debug, RSVP: { Promise } } = Ember;
 /**
  * For each part of the state tree which containers are 
@@ -15,7 +17,7 @@ const { get, set, run, computed, typeOf, debug, RSVP: { Promise } } = Ember;
  * The map will be keyed off the path/slice in the state tree that 
  * containers are interested.
  */
-let stateHashCodes = Immutable.Map();
+export let stateHashCodes = Immutable.Map();
 
 let store;
 const clone = (thingy) => {
@@ -63,32 +65,79 @@ const redux = Ember.Service.extend({
    * A registry organised by container registration
    */
   registry: {},
-  reduxSubscribers: [],
+  reduxSubscribers: {},
   _dispatchListeners: [],
 
   init() {
     this._super(...arguments);
     store = reduxStore();
 
-    // native redux subscription to all change
-    const watcher = watch(store.getState, '.');
-    // distribute "changes" to relevant containers
-    store.subscribe(watcher( (post) => {
-      const paths = this.get('paths');
-      Object.keys(paths).map(key => {
-        const stateTree = post.getIn(key.split('.'));
-        const oldHashValue = stateHashCodes[key];
-        const newHashValue = stateTree ? stateTree.hashCode() : null;
-        if(newHashValue !== oldHashValue) {
-          console.log(`state tree [${key}]: `, stateTree);
-          stateHashCodes[key] = newHashValue;
-          this._notifySubscribersOfChange(key, post.getIn(key.split('.')));
-        }
-      });
-    }));
-    store.subscribe(watcher((pre, post) => this._notifyInitializersOfChange(pre, post)));
+    // subscribe to native redux subscribe()
+    store.subscribe(watch(store.getState)((post, pre) => this._subscriptionChangeHandler(post, pre)));
+    // all other subscriptions should use this service's subscribe method
+    Object.keys(initialState).map(key => {
+      if (initialState[key].saveState) {
+        this.subscribe(this._notifyInitializersOfChange(key), key);
+      }
+    });
 
     this._actionCreators = actionCreators;
+  },
+  /**
+   * Handles all the subscriptions stored in reduxSubscribers
+   */
+  _subscriptionChangeHandler(post, pre) {
+    const cacheUpdates = [];
+    // review all subscribers for state changes
+    Object.keys(this.reduxSubscribers).forEach(subscriber => {
+      const { handler, path } = this.reduxSubscribers[subscriber];
+      const preState = pre ? pre.getIn(path.split('.')) : Immutable.Map();
+      const postState = post ? post.getIn(path.split('.')) : Immutable.Map();
+
+      if (Immutable.Iterable.isIterable(preState)) {
+        const preCode = cache.get(path) || 0;
+        const postCode = postState.hashCode();
+        if (preCode !== postCode) {
+          handler(postState, preState);
+          cacheUpdates.push({path, value: postCode});
+        }
+      }
+      if (!Immutable.Iterable.isIterable(preState) && preState !== postState) {
+        handler(postState, preState);
+      }
+    });
+
+    // review all connect events/paths
+    const paths = this.get('paths');
+    Object.keys(paths).map(path => {
+      const stateTree = post.getIn(path.split('.'));
+      if (Immutable.Iterable.isIterable(stateTree)) {
+        const preCode = cache.get(path);
+        const postCode = stateTree ? stateTree.hashCode() : 0;
+        if (preCode !== postCode) {
+          console.log(`state tree change [${path}]: `, stateTree);
+          this._notifySubscribersOfChange(path, stateTree);
+          cacheUpdates.push({path, value: postCode});
+        }
+      }
+    });
+
+    // update cache
+    cache.bulkAdd(cacheUpdates);
+  },
+
+  _containerChangeHandler(state) {
+    const paths = this.get('paths');
+    Object.keys(paths).map(key => {
+      const stateTree = state.getIn(key.split('.'));
+      const oldHashValue = stateHashCodes[key];
+      const newHashValue = stateTree ? stateTree.hashCode() : null;
+      if(newHashValue !== oldHashValue) {
+        
+        stateHashCodes[key] = newHashValue;
+        
+      }
+    });
   },
 
   getState() {
@@ -97,8 +146,21 @@ const redux = Ember.Service.extend({
   dispatch(action) {
     store.dispatch(action);
   },
-  subscribe(func) {
-    this.reduxSubscribers.push(func);
+  subscribe(handler, path = '.') {
+    const id = Math.random().toString(36).substr(2, 16);
+    const state = store.getState();
+    this.reduxSubscribers[id] = {handler, path};
+    handler(state.getIn(path.split('.'))); // initialize
+    console.log(`Redux: subscribed as "${id}" to watch path "${path}"`);
+    return id;
+  },
+  unsubscribe(id) {
+    if (!id) {
+      debug('Redux: attempt to unsubscribe without sending in an ID');
+      return;
+    }
+    console.log(`Redux: unsubscribing ${id}`);
+    delete this.reduxSubscribers[id];
   },
 
   /**
@@ -187,6 +249,38 @@ const redux = Ember.Service.extend({
   },
 
   /**
+   * Waits for a particular part/path of the state tree to become truthy
+   * at which it point it resolves it's promise with the value of the state tree
+   */
+  waitForState(path, timeout = 1000) {
+    const initialValue = this.getState().getIn(path.split('.'));
+    let done = false;
+    let id;
+    const handler = (resolve) => (post) => {
+      if(post) {
+        done = true;
+        this.unsubscribe(id);
+        resolve(post);
+      } 
+    }
+    return new Promise((resolve, reject) => {
+      const isEmpty = (thingy) => {
+        return Immutable.Iterable.isIterable(thingy)
+          ? thingy.isEmpty()
+          : !thingy;
+      };
+      if (initialValue && !isEmpty(initialValue)) { return resolve(initialValue); }
+      run.later(this, () => {
+        if(!done) { 
+          reject(`Timed out waiting for ${path}`); 
+        }
+      }, timeout);
+      id = this.subscribe(handler(resolve), path)
+    });
+
+  },
+
+  /**
    * waitFor
    * 
    * @param {string}    actionToLookFor  the action.type string or a subset of the string
@@ -260,17 +354,9 @@ const redux = Ember.Service.extend({
    * Communicates a relevant change in state to the
    * State Initializers so they can save their respective state
    */
-  _notifyInitializersOfChange(oldState, newState) {
-
-    Object.keys(initialState).map(key => {
-      const oldHashCode = stateHashCodes[key] ? stateHashCodes[key] : null;
-      const currentHashCode = newState ? newState.get(key).hashCode() : null;
-      if(initialState[key].saveState && oldHashCode !== currentHashCode) {
-        console.log(`handing ${key} to state-initializer's saveState()`);
-        if(oldHashCode === null) { stateHashCodes[key] = currentHashCode; }
-        initialState[key].saveState(newState);
-      }
-    });
+  _notifyInitializersOfChange: (key) => (newState, oldState) => {
+    console.log(`state-initializer[${key}]:`, newState);
+    initialState[key].saveState(newState);
   },
 
   /**
