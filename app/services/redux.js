@@ -256,26 +256,27 @@ const redux = Ember.Service.extend({
     const initialValue = this.getState().getIn(path.split('.'));
     let done = false;
     let id;
+    const isEmpty = (thingy) => {
+      return Immutable.Iterable.isIterable(thingy)
+        ? thingy.isEmpty()
+        : !thingy;
+    };
     const handler = (resolve) => (post) => {
-      if(post) {
+      if(!isEmpty(post)) {
         done = true;
         this.unsubscribe(id);
         resolve(post);
       } 
     }
     return new Promise((resolve, reject) => {
-      const isEmpty = (thingy) => {
-        return Immutable.Iterable.isIterable(thingy)
-          ? !thingy.isEmpty()
-          : !thingy;
-      };
       if (initialValue && !isEmpty(initialValue)) { return resolve(initialValue); }
       run.later(this, () => {
         if(!done) { 
           reject(`Timed out waiting for ${path}`); 
         }
       }, timeout);
-      id = this.subscribe(handler(resolve), path)
+
+      id = this.subscribe(handler(resolve), path);
     });
 
   },
