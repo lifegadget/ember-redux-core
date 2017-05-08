@@ -265,7 +265,7 @@ const redux = Ember.Service.extend({
       if(!isEmpty(post)) {
         done = true;
         this.unsubscribe(id);
-        resolve(post);
+        resolve(toJS(post));
       } 
     }
     return new Promise((resolve, reject) => {
