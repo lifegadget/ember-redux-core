@@ -266,7 +266,7 @@ const redux = Ember.Service.extend({
     return new Promise((resolve, reject) => {
       const isEmpty = (thingy) => {
         return Immutable.Iterable.isIterable(thingy)
-          ? thingy.isEmpty()
+          ? !thingy.isEmpty()
           : !thingy;
       };
       if (initialValue && !isEmpty(initialValue)) { return resolve(initialValue); }
