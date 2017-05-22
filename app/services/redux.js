@@ -355,8 +355,7 @@ const redux = Ember.Service.extend({
    * Communicates a relevant change in state to the
    * State Initializers so they can save their respective state
    */
-  _notifyInitializersOfChange: (key) => (newState, oldState) => {
-    console.log(`state-initializer[${key}]:`, newState);
+  _notifyInitializersOfChange: (key) => (newState) => {
     initialState[key].saveState(newState);
   },
 
