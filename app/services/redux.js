@@ -115,7 +115,6 @@ const redux = Ember.Service.extend({
         const preCode = cache.get(path);
         const postCode = stateTree ? stateTree.hashCode() : 0;
         if (preCode !== postCode) {
-          console.log(`state tree change [${path}]: `, stateTree);
           this._notifySubscribersOfChange(path, stateTree);
           cacheUpdates.push({path, value: postCode});
         }
@@ -336,7 +335,6 @@ const redux = Ember.Service.extend({
   _notifySubscribersOfChange(path, stateTree) {
     const paths = this.get('paths');
     const subscribers = paths[path];
-    console.log(`notifying subscribers of change to [${path}]`, subscribers);
     subscribers.forEach(subscriberId => {
       const subscriber = this.registry[subscriberId];
       const connectedProperty = subscriber.keys.filter(k => k.path === path)[0].connectedProperty;
